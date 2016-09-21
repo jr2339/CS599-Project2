@@ -5,8 +5,8 @@
 //  Created by jr2339 on 9/20/16.
 //  Copyright © 2016 jr2339. All rights reserved.
 //
-//#include "ppm.h"
 /**********************************************/
+#include "ppm.h"
 #ifndef json_h
 #define json_h
 //===========================================//
@@ -24,13 +24,6 @@ void skip_ws(FILE* json);
 char* parse_string(FILE* json);
 //===========================================//
 
-typedef struct pixel {
-    unsigned char red;
-    unsigned char green;
-    unsigned char blue;
-} pixel;
-
-
 typedef struct camera{
     char *type;
     float width;
@@ -39,14 +32,14 @@ typedef struct camera{
 
 typedef struct sphere{
     char *type;
-    pixel *color;
+    pixel color;
     float *center;
     float radius;
 }sphere;
 
 typedef struct plane{
     char *type;
-    pixel *color;
+    pixel color;
     float *position;
     float *normal;
 }plane;

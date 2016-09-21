@@ -10,6 +10,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "json.h"
+#include "vector.h"
+
 /***************************skip white space***************************/
 
 int main(int argc, const char * argv[]) {

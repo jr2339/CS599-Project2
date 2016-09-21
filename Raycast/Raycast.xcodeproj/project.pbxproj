@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		F617BDAF1D92084B00A65385 /* json.c in Sources */ = {isa = PBXBuildFile; fileRef = F617BDAE1D92084B00A65385 /* json.c */; };
+		F627357F1D933A0E005595E0 /* ppm.c in Sources */ = {isa = PBXBuildFile; fileRef = F627357D1D933A0E005595E0 /* ppm.c */; };
 		F6850CA31D91F8DA0098E955 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = F6850CA21D91F8DA0098E955 /* main.c */; };
 		F6A103F41D920D010067BD8F /* vector.c in Sources */ = {isa = PBXBuildFile; fileRef = F6A103F21D920D010067BD8F /* vector.c */; };
 /* End PBXBuildFile section */
@@ -27,6 +28,8 @@
 /* Begin PBXFileReference section */
 		F617BDAD1D91FF7C00A65385 /* json.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = json.h; sourceTree = "<group>"; };
 		F617BDAE1D92084B00A65385 /* json.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = json.c; sourceTree = "<group>"; };
+		F627357D1D933A0E005595E0 /* ppm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ppm.c; sourceTree = "<group>"; };
+		F627357E1D933A0E005595E0 /* ppm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ppm.h; sourceTree = "<group>"; };
 		F6850C9F1D91F8DA0098E955 /* Raycast */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Raycast; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6850CA21D91F8DA0098E955 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		F6A103F21D920D010067BD8F /* vector.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vector.c; sourceTree = "<group>"; };
@@ -64,6 +67,8 @@
 			isa = PBXGroup;
 			children = (
 				F6850CA21D91F8DA0098E955 /* main.c */,
+				F627357E1D933A0E005595E0 /* ppm.h */,
+				F627357D1D933A0E005595E0 /* ppm.c */,
 				F617BDAD1D91FF7C00A65385 /* json.h */,
 				F617BDAE1D92084B00A65385 /* json.c */,
 				F6A103F31D920D010067BD8F /* vector.h */,
@@ -131,6 +136,7 @@
 				F6850CA31D91F8DA0098E955 /* main.c in Sources */,
 				F617BDAF1D92084B00A65385 /* json.c in Sources */,
 				F6A103F41D920D010067BD8F /* vector.c in Sources */,
+				F627357F1D933A0E005595E0 /* ppm.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

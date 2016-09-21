@@ -108,8 +108,8 @@ float* plane_get_normal(plane *the_plane, float *position){
 float* sphere_reflection(sphere *the_sphere, float *position, float *direction){
     float *reflection = (float*)malloc(sizeof(float)*3);
     float *normal = sphere_get_normal(the_sphere, position);
-    v_scale(normal, -2*v_dot(direction, normal), reflection);
-    v_add(reflection, direction, reflection);
+    v_scale(normal, -2*v_dot(direction, normal), reflection); //−2(d⋅n)n
+    v_add(reflection, direction, reflection);                 //r=d−2(d⋅n)n
     v_unit(reflection, reflection);
     return reflection;
 }
@@ -123,8 +123,6 @@ float* plane_reflection(plane *the_plane, float *position, float *direction){
     v_unit(reflection, reflection);
     return reflection;
 }
-
-
 
 
 
