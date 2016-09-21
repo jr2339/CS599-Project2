@@ -5,44 +5,59 @@
 //  Created by jr2339 on 9/20/16.
 //  Copyright © 2016 jr2339. All rights reserved.
 //
-#include "ppm.h"
+//#include "ppm.h"
 /**********************************************/
 #ifndef json_h
 #define json_h
 //===========================================//
+/*
 #define CAMERA_TYPE 1
 #define SPHERE_TYPE 2
 #define PLANE_TYPE 3
-/*============================================
+ */
+//============================================
  /********************************************
     try to separate
+
  *********************************************/
-/*
+void skip_ws(FILE* json);
+char* parse_string(FILE* json);
+//===========================================//
+
+typedef struct pixel {
+    unsigned char red;
+    unsigned char green;
+    unsigned char blue;
+} pixel;
+
+
 typedef struct camera{
     char *type;
     float width;
     float height;
-}camera；
+}camera;
 
 typedef struct sphere{
     char *type;
-    float *color;
+    pixel *color;
     float *center;
     float radius;
 }sphere;
 
 typedef struct plane{
     char *type;
-    float *color;
+    pixel *color;
     float *position;
     float *normal;
 }plane;
-===================================================*/
-//All camera, sphere and plane are object
-tydef struct object{
+
+
+/*===================================================
+//All camera, sphere and plane are josn
+tydef struct josn{
     int type;
     union{
-        struct sphere{
+        struct camera{
             float width;
             float height;
         }camera;
@@ -58,5 +73,6 @@ tydef struct object{
     
     pixel color;
     
-}object;
+}josh;
+ */
 #endif /* json_h */

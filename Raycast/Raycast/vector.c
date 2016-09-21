@@ -6,10 +6,14 @@
 //  Copyright © 2016 jr2339. All rights reserved.
 //
 
-#include "vector.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
+
+#include "vector.h"
+#include "json.h"
 
 /******************************************************
  Initializes three float values into a given vector
@@ -64,13 +68,61 @@ void v_cross(float *v1, float *v2, float *out) {
     out[2] = v1[0]*v2[1] - v1[1]*v2[0];
 }
 //====================================================================
+/*Get the normal of a shape at a given position
+ *the_sphere/the_plane: the camera/sphere/plane to get the normal of
+ *position: The position on the object to calculate the normal
+ *returns: The normal to the camera/sphere/plane at the given position
+======================================================================*/
+float* sphere_get_normal(sphere *the_sphere, float *position){
+    float *normal;
+    if(strcmp(the_sphere->type,"sphere")==0){
+        normal = (float*)malloc(sizeof(float)*3);
+        v_sub(position,the_sphere->center,normal);
+        v_unit(normal, normal);
+    }
+    else{
+        fprintf(stderr,"Can't get normal for sphere\n");
+        exit(-1);
+    }
+    return normal;
+}
+
+
+float* plane_get_normal(plane *the_plane, float *position){
+    float *normal;
+    if(strcmp(the_plane->type,"plane")==0){
+        normal = the_plane->normal;
+    }
+    else{
+        fprintf(stderr,"Can't get normal for plane\n");
+        exit(-1);
+    }
+    return normal;
+}
+//====================================================================
 /*Compute the reflection of a vector on an object
- *the_object: the object to reflect off
+ *he_sphere/the_plane: he_sphere/the_plane to reflect off
  *position: The position where lights hit
  *Returns: the reflection of direction on the object at the position
 ======================================================================*/
+float* sphere_reflection(sphere *the_sphere, float *position, float *direction){
+    float *reflection = (float*)malloc(sizeof(float)*3);
+    float *normal = sphere_get_normal(the_sphere, position);
+    v_scale(normal, -2*v_dot(direction, normal), reflection);
+    v_add(reflection, direction, reflection);
+    v_unit(reflection, reflection);
+    return reflection;
+}
 
 
+float* plane_reflection(plane *the_plane, float *position, float *direction){
+    float *reflection = (float*)malloc(sizeof(float)*3);
+    float *normal = plane_get_normal(the_plane, position);
+    v_scale(normal, -2*v_dot(direction, normal), reflection);
+    v_add(reflection, direction, reflection);
+    v_unit(reflection, reflection);
+    return reflection;
+}
 
 
 
