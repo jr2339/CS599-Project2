@@ -7,14 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F617BDAF1D92084B00A65385 /* object.c in Sources */ = {isa = PBXBuildFile; fileRef = F617BDAE1D92084B00A65385 /* object.c */; };
-		F627357F1D933A0E005595E0 /* ppm.c in Sources */ = {isa = PBXBuildFile; fileRef = F627357D1D933A0E005595E0 /* ppm.c */; };
-		F6850CA31D91F8DA0098E955 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = F6850CA21D91F8DA0098E955 /* main.c */; };
-		F6A103F41D920D010067BD8F /* vector.c in Sources */ = {isa = PBXBuildFile; fileRef = F6A103F21D920D010067BD8F /* vector.c */; };
+		F62735931D93B46D005595E0 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = F62735921D93B46D005595E0 /* main.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		F6850C9D1D91F8DA0098E955 /* CopyFiles */ = {
+		F627358D1D93B46D005595E0 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = /usr/share/man/man1/;
@@ -26,18 +23,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		F617BDAD1D91FF7C00A65385 /* object.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = object.h; sourceTree = "<group>"; };
-		F617BDAE1D92084B00A65385 /* object.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = object.c; sourceTree = "<group>"; };
-		F627357D1D933A0E005595E0 /* ppm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ppm.c; sourceTree = "<group>"; };
-		F627357E1D933A0E005595E0 /* ppm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ppm.h; sourceTree = "<group>"; };
-		F6850C9F1D91F8DA0098E955 /* Raycast */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Raycast; sourceTree = BUILT_PRODUCTS_DIR; };
-		F6850CA21D91F8DA0098E955 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
-		F6A103F21D920D010067BD8F /* vector.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vector.c; sourceTree = "<group>"; };
-		F6A103F31D920D010067BD8F /* vector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vector.h; sourceTree = "<group>"; };
+		F627358F1D93B46D005595E0 /* RayCasting */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = RayCasting; sourceTree = BUILT_PRODUCTS_DIR; };
+		F62735921D93B46D005595E0 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		F6850C9C1D91F8DA0098E955 /* Frameworks */ = {
+		F627358C1D93B46D005595E0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -47,103 +38,95 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		F6850C961D91F8DA0098E955 = {
+		F62735861D93B46D005595E0 = {
 			isa = PBXGroup;
 			children = (
-				F6850CA11D91F8DA0098E955 /* Raycast */,
-				F6850CA01D91F8DA0098E955 /* Products */,
+				F62735911D93B46D005595E0 /* RayCasting */,
+				F62735901D93B46D005595E0 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		F6850CA01D91F8DA0098E955 /* Products */ = {
+		F62735901D93B46D005595E0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F6850C9F1D91F8DA0098E955 /* Raycast */,
+				F627358F1D93B46D005595E0 /* RayCasting */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		F6850CA11D91F8DA0098E955 /* Raycast */ = {
+		F62735911D93B46D005595E0 /* RayCasting */ = {
 			isa = PBXGroup;
 			children = (
-				F6850CA21D91F8DA0098E955 /* main.c */,
-				F627357E1D933A0E005595E0 /* ppm.h */,
-				F627357D1D933A0E005595E0 /* ppm.c */,
-				F617BDAD1D91FF7C00A65385 /* object.h */,
-				F617BDAE1D92084B00A65385 /* object.c */,
-				F6A103F31D920D010067BD8F /* vector.h */,
-				F6A103F21D920D010067BD8F /* vector.c */,
+				F62735921D93B46D005595E0 /* main.c */,
 			);
-			path = Raycast;
+			path = RayCasting;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		F6850C9E1D91F8DA0098E955 /* Raycast */ = {
+		F627358E1D93B46D005595E0 /* RayCasting */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F6850CA61D91F8DA0098E955 /* Build configuration list for PBXNativeTarget "Raycast" */;
+			buildConfigurationList = F62735961D93B46D005595E0 /* Build configuration list for PBXNativeTarget "RayCasting" */;
 			buildPhases = (
-				F6850C9B1D91F8DA0098E955 /* Sources */,
-				F6850C9C1D91F8DA0098E955 /* Frameworks */,
-				F6850C9D1D91F8DA0098E955 /* CopyFiles */,
+				F627358B1D93B46D005595E0 /* Sources */,
+				F627358C1D93B46D005595E0 /* Frameworks */,
+				F627358D1D93B46D005595E0 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = Raycast;
-			productName = Raycast;
-			productReference = F6850C9F1D91F8DA0098E955 /* Raycast */;
+			name = RayCasting;
+			productName = RayCasting;
+			productReference = F627358F1D93B46D005595E0 /* RayCasting */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		F6850C971D91F8DA0098E955 /* Project object */ = {
+		F62735871D93B46D005595E0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = jr2339;
 				TargetAttributes = {
-					F6850C9E1D91F8DA0098E955 = {
-						CreatedOnToolsVersion = 7.3.1;
+					F627358E1D93B46D005595E0 = {
+						CreatedOnToolsVersion = 8.0;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
-			buildConfigurationList = F6850C9A1D91F8DA0098E955 /* Build configuration list for PBXProject "Raycast" */;
+			buildConfigurationList = F627358A1D93B46D005595E0 /* Build configuration list for PBXProject "RayCasting" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = F6850C961D91F8DA0098E955;
-			productRefGroup = F6850CA01D91F8DA0098E955 /* Products */;
+			mainGroup = F62735861D93B46D005595E0;
+			productRefGroup = F62735901D93B46D005595E0 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				F6850C9E1D91F8DA0098E955 /* Raycast */,
+				F627358E1D93B46D005595E0 /* RayCasting */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		F6850C9B1D91F8DA0098E955 /* Sources */ = {
+		F627358B1D93B46D005595E0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F6850CA31D91F8DA0098E955 /* main.c in Sources */,
-				F617BDAF1D92084B00A65385 /* object.c in Sources */,
-				F6A103F41D920D010067BD8F /* vector.c in Sources */,
-				F627357F1D933A0E005595E0 /* ppm.c in Sources */,
+				F62735931D93B46D005595E0 /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		F6850CA41D91F8DA0098E955 /* Debug */ = {
+		F62735941D93B46D005595E0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -155,12 +138,13 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
@@ -189,7 +173,7 @@
 			};
 			name = Debug;
 		};
-		F6850CA51D91F8DA0098E955 /* Release */ = {
+		F62735951D93B46D005595E0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -201,12 +185,13 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
@@ -228,14 +213,14 @@
 			};
 			name = Release;
 		};
-		F6850CA71D91F8DA0098E955 /* Debug */ = {
+		F62735971D93B46D005595E0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
 		};
-		F6850CA81D91F8DA0098E955 /* Release */ = {
+		F62735981D93B46D005595E0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -245,25 +230,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		F6850C9A1D91F8DA0098E955 /* Build configuration list for PBXProject "Raycast" */ = {
+		F627358A1D93B46D005595E0 /* Build configuration list for PBXProject "RayCasting" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F6850CA41D91F8DA0098E955 /* Debug */,
-				F6850CA51D91F8DA0098E955 /* Release */,
+				F62735941D93B46D005595E0 /* Debug */,
+				F62735951D93B46D005595E0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F6850CA61D91F8DA0098E955 /* Build configuration list for PBXNativeTarget "Raycast" */ = {
+		F62735961D93B46D005595E0 /* Build configuration list for PBXNativeTarget "RayCasting" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F6850CA71D91F8DA0098E955 /* Debug */,
-				F6850CA81D91F8DA0098E955 /* Release */,
+				F62735971D93B46D005595E0 /* Debug */,
+				F62735981D93B46D005595E0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = F6850C971D91F8DA0098E955 /* Project object */;
+	rootObject = F62735871D93B46D005595E0 /* Project object */;
 }

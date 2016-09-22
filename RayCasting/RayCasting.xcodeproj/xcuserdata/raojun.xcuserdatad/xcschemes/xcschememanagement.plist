@@ -4,7 +4,7 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>Raycast.xcscheme</key>
+		<key>RayCasting.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
@@ -12,7 +12,7 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>F6850C9E1D91F8DA0098E955</key>
+		<key>F627358E1D93B46D005595E0</key>
 		<dict>
 			<key>primary</key>
 			<true/>

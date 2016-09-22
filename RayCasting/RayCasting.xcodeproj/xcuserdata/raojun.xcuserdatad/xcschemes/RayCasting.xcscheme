@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "F6850C9E1D91F8DA0098E955"
-               BuildableName = "Raycast"
-               BlueprintName = "Raycast"
-               ReferencedContainer = "container:Raycast.xcodeproj">
+               BlueprintIdentifier = "F627358E1D93B46D005595E0"
+               BuildableName = "RayCasting"
+               BlueprintName = "RayCasting"
+               ReferencedContainer = "container:RayCasting.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -32,10 +32,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "F6850C9E1D91F8DA0098E955"
-            BuildableName = "Raycast"
-            BlueprintName = "Raycast"
-            ReferencedContainer = "container:Raycast.xcodeproj">
+            BlueprintIdentifier = "F627358E1D93B46D005595E0"
+            BuildableName = "RayCasting"
+            BlueprintName = "RayCasting"
+            ReferencedContainer = "container:RayCasting.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -55,10 +55,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "F6850C9E1D91F8DA0098E955"
-            BuildableName = "Raycast"
-            BlueprintName = "Raycast"
-            ReferencedContainer = "container:Raycast.xcodeproj">
+            BlueprintIdentifier = "F627358E1D93B46D005595E0"
+            BuildableName = "RayCasting"
+            BlueprintName = "RayCasting"
+            ReferencedContainer = "container:RayCasting.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -74,10 +74,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "F6850C9E1D91F8DA0098E955"
-            BuildableName = "Raycast"
-            BlueprintName = "Raycast"
-            ReferencedContainer = "container:Raycast.xcodeproj">
+            BlueprintIdentifier = "F627358E1D93B46D005595E0"
+            BuildableName = "RayCasting"
+            BlueprintName = "RayCasting"
+            ReferencedContainer = "container:RayCasting.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
