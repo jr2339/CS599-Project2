@@ -7,8 +7,8 @@
 //
 /**********************************************/
 #include "ppm.h"
-#ifndef json_h
-#define json_h
+#ifndef object_h
+#define object_h
 //===========================================//
 /*
 #define CAMERA_TYPE 1
@@ -68,4 +68,4 @@ tydef struct josn{
     
 }josh;
  */
-#endif /* json_h */
+#endif /* object_h */

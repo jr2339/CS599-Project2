@@ -12,11 +12,13 @@
 #include <ctype.h>//fgetc()
 #include <string.h> // strdup
 
-#include "json.h"
+#include "object.h"
 #include "vector.h"
 
+
+
+/*===============================This is Dr.Palmer's code===================*/
 //==============================skip the white space==========================//
-//==============================This is Dr.Palmer's code======================//
 void skip_ws(FILE* json){
     int c = fgetc(json);
     while(isspace(c)){
@@ -44,3 +46,29 @@ char* parse_string(FILE* json){
 }
 
 //==============================================================================//
+/* Read in a scene file and convert the shapes into struct.
+ *file_path: the path to the file to be read
+ *Return: An array of points to objects structs.
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

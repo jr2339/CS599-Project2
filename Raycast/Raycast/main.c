@@ -10,13 +10,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "json.h"
+#include "object.h"
 #include "vector.h"
-
-/***************************skip white space***************************/
+#include "ppm.h"
+/******************************************************************************************/
+/* Prints the correct invocation of this program.
+ */
+void print_usage() {
+    printf("USAGE: raycast l|v width outputfile.ppm\n");
+    printf("Where l means parallel, v means perspective, and width is an integer.\n");
+}
 
 int main(int argc, const char * argv[]) {
-    // insert code here...
-    printf("Hello, World!\n");
+    if (argc < 5) {
+        //reauire 4 arguments, width of image, height of image, input json file and output ppm file
+    }
     return 0;
 }

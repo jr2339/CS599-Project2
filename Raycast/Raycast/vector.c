@@ -13,7 +13,7 @@
 #include <string.h>
 
 #include "vector.h"
-#include "json.h"
+#include "object.h"
 
 /******************************************************
  Initializes three float values into a given vector
