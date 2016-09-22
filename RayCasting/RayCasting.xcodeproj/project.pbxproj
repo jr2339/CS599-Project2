@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		F62735931D93B46D005595E0 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = F62735921D93B46D005595E0 /* main.c */; };
+		F627359B1D93B5A5005595E0 /* helps.c in Sources */ = {isa = PBXBuildFile; fileRef = F62735991D93B5A5005595E0 /* helps.c */; };
+		F627359E1D93BBE0005595E0 /* image.c in Sources */ = {isa = PBXBuildFile; fileRef = F627359C1D93BBE0005595E0 /* image.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +27,10 @@
 /* Begin PBXFileReference section */
 		F627358F1D93B46D005595E0 /* RayCasting */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = RayCasting; sourceTree = BUILT_PRODUCTS_DIR; };
 		F62735921D93B46D005595E0 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		F62735991D93B5A5005595E0 /* helps.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = helps.c; sourceTree = "<group>"; };
+		F627359A1D93B5A5005595E0 /* helps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = helps.h; sourceTree = "<group>"; };
+		F627359C1D93BBE0005595E0 /* image.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = image.c; sourceTree = "<group>"; };
+		F627359D1D93BBE0005595E0 /* image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = image.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +64,10 @@
 			isa = PBXGroup;
 			children = (
 				F62735921D93B46D005595E0 /* main.c */,
+				F62735991D93B5A5005595E0 /* helps.c */,
+				F627359A1D93B5A5005595E0 /* helps.h */,
+				F627359C1D93BBE0005595E0 /* image.c */,
+				F627359D1D93BBE0005595E0 /* image.h */,
 			);
 			path = RayCasting;
 			sourceTree = "<group>";
@@ -119,6 +129,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F627359E1D93BBE0005595E0 /* image.c in Sources */,
+				F627359B1D93B5A5005595E0 /* helps.c in Sources */,
 				F62735931D93B46D005595E0 /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
