@@ -11,31 +11,14 @@
 
 #include <stdio.h>
 /**********Use boolean or #include <stdbool.h>*******/
-typedef enum {
-    false, true
-} bool;
-/**********This is the Possible Type for Json File*******/
-typedef enum {
-    J_STRING,
-    J_NUMBER,
-    J_OBJECT,  // such as sphere, camera, line, plane
-    J_ARRAY,
-    J_BOOLEAN,
-    J_NULL,
-}TYPE;
-/**********After we have type, Now we define the Vaule for Json*******/
-typedef struct VALUE{
-    TYPE type;
-    union{
-        char *String;
-        double Number;
-        bool   Boolean;
-        char Null;
-        struct VALUE *value;
-    }data;
-    int count;
-    char **keys;
-}VALUE;
-
+typedef struct Object{
+    char *type;
+    float width;
+    float height;
+    float radius;
+    float position[3];
+    float color[3];
+    float normal[3];
+}Object;
 
 #endif /* json_h */
