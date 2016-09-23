@@ -15,8 +15,8 @@
 #include "json.h"
 /*******************************************This is Dr.Palmer's code*******************************/
 /*******************************************Declaration*******************************/
-void errorCheck(int c, FILE* json, int line);
-void Check_symbol(int c, char symbol, int line);
+void Check_Error(char ch, FILE* json, int line);
+void Check_symbol(char ch, char symbol, int line);
 char Get_Char(FILE* json, int* line);
 void skip_ws(FILE* json, int* line);
 char* nextString(FILE* json, int* line);
@@ -203,6 +203,102 @@ Object* readScene(const char* json_file_path){
         Check_symbol(ch, '}', line);
         skip_ws(json, &line);
     }while((ch = Get_Char(json, &line)) == ',');
-/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ DO While Lopp END @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ DO While Lopp END @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+    Check_symbol(ch, ']', line);
+    // Manually get trailing whitespace
+    while((ch = fgetc(json)) != EOF && isspace(ch)) {
+        if(ch == '\n') {
+            line += 1;
+        }
+    }
+    
+    if (ch!=EOF) {
+        fprintf(stderr, "Error: Line %d: Unkown symbol at end-of-file\n", line);
+        exit(1);
+    }
+    else if (!feof(json) && ferror(json)){
+        fprintf(stderr, "Error: Line %d: Read error\n", line);
+        perror("");
+        exit(1);
+    }
+    
+    if(object == NULL) {
+        fprintf(stderr, "Warning: Line %d: Empty array\n", line);
+    }
     return object;
 }
+
+
+/*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+void Check_Error(char ch, FILE* json, int line){
+    if (ch == EOF) {
+        if(feof(json)) {
+            fprintf(stderr, "Error: Line %d: Premature end-of-file\n", line);
+            exit(1);
+        }
+        else if(ferror(json)) {
+            fprintf(stderr, "Error: Line %d: Read error\n", line);
+            perror("");
+            exit(1);
+        }
+    }
+}
+
+
+/*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+void Check_symbol(char ch, char symbol, int line){
+    if(ch != symbol) {
+        fprintf(stderr, "Error: Line %d: Expected '%c'\n", line, symbol);
+        exit(1);
+    }
+}
+
+/*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+char Get_Char(FILE* json, int* line){
+    char ch = fgetc(json);
+    Check_Error(ch, json, *line);
+    if(ch == '\n') {
+        *line += 1;
+    }
+    return ch;
+}
+/*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+void skip_ws(FILE* json, int* line){
+    char ch;
+    ch = Get_Char(json, line);
+    while(isspace(ch)) {
+        ch = Get_Char(json, line);
+    }
+    if(ungetc(ch, json) == EOF) {
+        fprintf(stderr, "Error: Line %d: Read error\n", *line);
+        perror("");
+        exit(1);
+    }
+}
+/*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
