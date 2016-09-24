@@ -276,13 +276,96 @@ void skip_ws(FILE* json, int* line){
     }
 }
 /*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+char* nextString(FILE* json, int* line){
+    int buffer_size = 64;
+    int old_size = buffer_size;
+    char ch;
+    int i=0;
+    char* buffer = malloc(sizeof(char)*buffer_size);
+    if(buffer == NULL) {
+        fprintf(stderr, "Error: Line %d: Memory allocation error\n", *line);
+        perror("");
+        exit(1);
+    }
+    
+    ch = Get_Char(json, line);
+    Check_symbol(ch, '"', *line);
+    while(i<buffer_size-1&&(ch = Get_Char(json, line)!='"')){
+        if (i==buffer_size-2) {
+            buffer_size = buffer_size*2;
+            if(old_size != 0 && buffer_size / old_size != 2) {
+                fprintf(stderr, "Error: Line %d: Integer overflow on size\n",*line);
+                exit(1);
+            }
+            
+            old_size = buffer_size;
+            buffer = realloc(buffer, buffer_size);
+            if(old_size != 0 && buffer_size / old_size != 2) {
+                fprintf(stderr, "Error: Line %d: Integer overflow on size\n",*line);
+                perror("");
+                exit(1);
+            }
+        }
+        buffer[i++] = ch;
+    }
+    buffer[i] ='\0';
+    
+    return buffer;
+}
+/*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+double nextNumber(FILE* json, int* line) {
+    double value;
+    int status = fscanf(json, "%lf", &value);
+    Check_Error(status, json, *line);
+    if(status < 1) {
+        fprintf(stderr, "Error: Line %d: Invalid number\n", *line);
+        exit(1);
+    }
+    
+    if(errno == ERANGE) {
+        if(value == 0) {
+            fprintf(stderr, "Error: Line %d: Number underflow\n", *line);
+            exit(1);
+        }
+        if(value == HUGE_VAL || value == -HUGE_VAL) {
+            fprintf(stderr, "Error: Line %d: Number overflow\n", *line);
+            exit(1);
+        }
+    }
+    
+    return value;
+}
 
+/*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 
-
-
-
-
-
+double* nextVector3d(FILE* json, int* line) {
+    int SIZE = 3;
+    double* vector = malloc(SIZE * sizeof(*vector));
+    if(vector == NULL) {
+        fprintf(stderr, "Error: Line %d: Memory allocation error\n", *line);
+        perror("");
+        exit(1);
+    }
+    char ch = Get_Char(json, line);
+    Check_symbol(ch, '[', *line);
+    
+    for(int i = 0; i < SIZE; i++) {
+        skip_ws(json, line);
+        vector[i] = nextNumber(json, line);
+        
+        if(i < SIZE - 1) {
+            skip_ws(json, line);
+            ch = Get_Char(json, line);
+            Check_symbol(ch, ',', *line);
+        }
+    }
+    
+    skip_ws(json, line);
+    ch = Get_Char(json, line);
+   Check_symbol(ch, ']', *line);
+    
+    return vector;
+}
 
 
 
