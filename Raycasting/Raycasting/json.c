@@ -276,8 +276,9 @@ void skip_ws(FILE* json, int* line){
     }
 }
 /*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+/*We use nextString() function to find type attribute and sve this one on the buffer to compare our json file*/
 char* nextString(FILE* json, int* line){
-    int buffer_size = 64;
+    int buffer_size = 64; // for safety we set our buffer size is 64
     int old_size = buffer_size;
     char ch;
     int i=0;
@@ -287,17 +288,15 @@ char* nextString(FILE* json, int* line){
         perror("");
         exit(1);
     }
-    
     ch = Get_Char(json, line);
     Check_symbol(ch, '"', *line);
-    while(i<buffer_size-1&&(ch = Get_Char(json, line)!='"')){
-        if (i==buffer_size-2) {
+    while(i<buffer_size-1&&(ch = Get_Char(json, line)!='"')){ // if we didn't read the whole string
+        if (i==buffer_size-2) {        // our buffer size is too small, and we extend it
             buffer_size = buffer_size*2;
             if(old_size != 0 && buffer_size / old_size != 2) {
                 fprintf(stderr, "Error: Line %d: Integer overflow on size\n",*line);
                 exit(1);
             }
-            
             old_size = buffer_size;
             buffer = realloc(buffer, buffer_size);
             if(old_size != 0 && buffer_size / old_size != 2) {
@@ -362,12 +361,16 @@ double* nextVector3d(FILE* json, int* line) {
     
     skip_ws(json, line);
     ch = Get_Char(json, line);
-   Check_symbol(ch, ']', *line);
+    Check_symbol(ch, ']', *line);
     
     return vector;
 }
 
-
+/***********************************************************Test Main function**************************************/
+int main(int argc, char** argv){
+    readScene(argv[1]);
+    return 0;
+}
 
 
 
