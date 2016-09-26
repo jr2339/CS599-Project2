@@ -19,6 +19,7 @@ typedef struct Object{
     float position[3];
     float color[3];
     float normal[3];
+    float coefficient[10]; // this is for quadric
 }Object;
 
 #endif /* json_h */
