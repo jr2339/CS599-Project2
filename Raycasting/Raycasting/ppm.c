@@ -149,7 +149,7 @@ Image *ImageRead(const char *filename){
         
     }
     else if(buffer->magic_number == 7){
-        int num2;
+        size_t num2;
         readPAMHeadr(fp,buffer);
         buffer->data = (u_char *)malloc(buffer->width*buffer->height*4);
         char ch = getc(fp); // ch is int
@@ -192,7 +192,7 @@ Image *ImageRead(const char *filename){
 /**************************************************************************************************************
  **************************************************************************************************************/
 void ImageWrite(Image *buffer, const char *filename,int format){
-    int num2;
+    size_t num2;
     int size = buffer->width * buffer->height * 4;
     FILE *f_des = fopen(filename, "w");
     if (!f_des){
