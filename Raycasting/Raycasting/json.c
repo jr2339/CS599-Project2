@@ -22,12 +22,13 @@ void skip_ws(FILE* json, int* line);
 char* nextString(FILE* json, int* line);
 double nextNumber(FILE* json, int* line);
 double* nextVector(FILE* json, int* line);
+double* nextCoefficient(FILE* json, int* line);
 /*******************************************Declaration*******************************/
 Object* readScene(const char* json_file_path){
     Object* object = NULL; // init
     int object_size = 0;
     int line =1; // line at here is a indicator, could tell us our input jason file error
-    double *vector;
+    double *vector,*coefficient;
     char ch;
     FILE* json = fopen(json_file_path, "r");
     if(json == NULL){
@@ -54,11 +55,13 @@ Object* readScene(const char* json_file_path){
             fprintf(stderr, "Waring: Line %d: Empty object\n",line);
             skip_ws(json,&line);
         }
+        /*put pointer back to the string stream*/
         else if(ungetc(ch,json)==EOF){
             fprintf(stderr, "Error: Line %d: Read erroe\n",line);
             perror("");
             exit(1);
         }
+        /*if we don't have enough, we realloct one object_size memory for our object array*/
         if((object = realloc(object,++object_size))==NULL){
             fprintf(stderr, "Error：Line %d: mEMORY reallocation error\n",line);
             perror("");
@@ -72,22 +75,23 @@ Object* readScene(const char* json_file_path){
             exit(1);
         }
         
-        /*if it is a type, we skip the white space
+        /*******************************************************
+         *if it is a type, we skip the white space
          *and then get the symbol
          *compare with :
-         */
+         ********************************************************/
         skip_ws(json, &line);
         ch = Get_Char(json, &line);
         Check_symbol(ch, ':', line);
         
-        /*We skip the white space
-         ************************
-         */
+        /*************************************************************
+         We skip the white space
+         **************************************************************/
         skip_ws(json, &line);
         object[object_size-1].type = nextString(json, &line);
-        /***********************
-         ***********************
-         */
+        /*********************************************************
+         *We get the type content and compare to specified content
+         *********************************************************/
         skip_ws(json, &line);
         /*====================================================start while loop=================================================*/
         while((ch = Get_Char(json, &line))==','){
@@ -193,7 +197,32 @@ Object* readScene(const char* json_file_path){
                     exit(1);
                 }
             }
-            
+            /*************************************************if it is quadric*************************************/
+            else if(strcmp(object[object_size - 1].type, "quadric") == 0){
+                if(strcmp(attribute, "color")==0) {
+                    vector = nextVector(json, &line);
+                    for(int i = 0; i < 3; i++) {
+                        if(vector[i] < 0 || vector[i] > 1) {
+                            
+                            fprintf(stderr, "Error: Line %d: Color must be between 0.0 and 1.0\n", line);
+                            exit(1);
+                        }
+                        object[object_size - 1].color[i] = vector[i];
+                    }
+                    free(vector);
+                }
+                else if(strcmp(attribute, "coefficient")==0) {
+                    coefficient = nextCoefficient(json, &line);
+                    for(int i = 0; i < 10; i++) {
+                        object[object_size - 1].coefficient[i] = coefficient[i];
+                    }
+                    free(coefficient);
+                }
+                else {
+                    fprintf(stderr, "Error: Line %d: Key '%s' not supported under 'quadric'\n", line, attribute);
+                    exit(1);
+                }
+            }
             /*************************************************unknown object*************************************/
             else {
                 fprintf(stderr, "Error: Line %d: Unknown type %s", line, object[object_size- 1].type);
@@ -347,13 +376,15 @@ double nextNumber(FILE* json, int* line) {
 
 double* nextVector(FILE* json, int* line) {
     
-    int SIZE = 3; // we have three value in our array
+    int SIZE = 3; // we have 3 values in our array
     double* vector = malloc(SIZE * sizeof(*vector));
     if(vector == NULL) {
         fprintf(stderr, "Error: Line %d: Memory allocation error\n", *line);
         perror("");
         exit(1);
     }
+    
+    /*******'[' is the first char for our array*******/
     char ch = Get_Char(json, line);
     Check_symbol(ch, '[', *line);
     
@@ -374,8 +405,44 @@ double* nextVector(FILE* json, int* line) {
     
     return vector;
 }
+/*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+double* nextCoefficient(FILE* json, int* line){
+    int SIZE = 10; // we have 10 values in our coefficient array
+    double* coefficient = malloc(SIZE *sizeof(*coefficient));
+    if(coefficient == NULL) {
+        fprintf(stderr, "Error: Line %d: Memory allocation error\n", *line);
+        perror("");
+        exit(1);
+    }
+    
+    /*******'[' is the first char for our array*******/
+    char ch = Get_Char(json, line);
+    Check_symbol(ch, '[', *line);
+    
+    
+    for(int i = 0; i < SIZE; i++) {
+        skip_ws(json, line);
+        coefficient[i] = nextNumber(json, line);
+        
+        /**********after we get each number, we need to check the comma****************/
+        if(i < SIZE - 1) {
+            skip_ws(json, line);
+            ch = Get_Char(json, line);
+            Check_symbol(ch, ',', *line);
+        }
+    }
+    
+    /*********after we got all of the number in our array, we need to check the close ']*****/
+    
+    skip_ws(json, line);
+    ch = Get_Char(json, line);
+    Check_symbol(ch, ']', *line);
 
+    
+    return coefficient;
+}
 /***********************************************************Test Main function**************************************/
+/*
 int main(int argc, char** argv){
     readScene(argv[1]);
     return 0;
@@ -383,7 +450,7 @@ int main(int argc, char** argv){
 
 
 
-
+*/
 
 
 
