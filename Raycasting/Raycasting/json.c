@@ -14,444 +14,311 @@
 
 #include "json.h"
 /*******************************************This is Dr.Palmer's code*******************************/
-/*******************************************Declaration*******************************/
-void Check_Error(char ch, FILE* json, int line);
-void Check_symbol(char ch, char symbol, int line);
-char Get_Char(FILE* json, int* line);
-void skip_ws(FILE* json, int* line);
-char* nextString(FILE* json, int* line);
-double nextNumber(FILE* json, int* line);
-double* nextVector(FILE* json, int* line);
-double* nextCoefficient(FILE* json, int* line);
-/*******************************************Declaration*******************************/
-Object* readScene(const char* json_file_path){
-    Object* object = NULL; // init
-    int object_size = 0;
-    int line =1; // line at here is a indicator, could tell us our input jason file error
-    double *vector,*coefficient;
-    char ch;
-    FILE* json = fopen(json_file_path, "r");
-    if(json == NULL){
-        fprintf(stderr, "Error: Can't Opening input json file\n");
+// next_c wraps the getc function that provides error checking and line #
+// Problem: if we do ungetc, it could screw us up on the line #
+#define NumberOfObjects 20 // In our Json File, we have 20 Objects
+
+int line = 1;  // global variable, it will tells us which line is not correct
+
+OBJECT objects[NumberOfObjects]; // Allocate an array for All Objects in Json File
+
+// next_c() wraps the getc() function and provides error checking and line
+// number maintenance
+int next_c(FILE* json) {
+    int c = fgetc(json);
+#ifdef DEBUG
+    printf("next_c: '%c'\n", c);
+#endif
+    if (c == '\n') {
+        line++;;
+    }
+    if (c == EOF) {
+        fprintf(stderr, "Error: next_c: Unexpected EOF: %d\n", line);
         exit(1);
     }
-    /* We will check our input file is a json file or not*/
-    /*the first step is skip the white space*/
-    skip_ws(json,&line);
-    /*After we skip the white space, we get the first symbol or char */
-    ch = Get_Char(json, &line);
-    /*Then Check this symbol is '[' or not, more details see structure for json file*/
-    Check_symbol(ch, '[', line);
-    /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ DO While Lopp @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
-    do{
-        /*If it is we will skip the white space, and get char and compare with '{'*/
-        skip_ws(json, &line);
-        ch = Get_Char(json, &line);
-        Check_symbol(ch, '{', line);
-        /*Skip the white space, and get the first charcater*/
-        skip_ws(json, &line);
-        ch = Get_Char(json, &line); //
-        if(ch=='}'){
-            fprintf(stderr, "Waring: Line %d: Empty object\n",line);
-            skip_ws(json,&line);
-        }
-        /*put pointer back to the string stream*/
-        else if(ungetc(ch,json)==EOF){
-            fprintf(stderr, "Error: Line %d: Read erroe\n",line);
-            perror("");
-            exit(1);
-        }
-        /*if we don't have enough, we realloct one object_size memory for our object array*/
-        if((object = realloc(object,++object_size))==NULL){
-            fprintf(stderr, "Error：Line %d: mEMORY reallocation error\n",line);
-            perror("");
-            exit(1);
-        }
-        /*attribute is object attribute, such as type, width, height*/
-        char* attribute = nextString(json, &line);
-        /*if it is not a type, give me an error*/
-        if(strcmp(attribute, "type")!=0){
-            fprintf(stderr, "Error: First key must be 'type'\n");
-            exit(1);
-        }
-        
-        /*******************************************************
-         *if it is a type, we skip the white space
-         *and then get the symbol
-         *compare with :
-         ********************************************************/
-        skip_ws(json, &line);
-        ch = Get_Char(json, &line);
-        Check_symbol(ch, ':', line);
-        
-        /*************************************************************
-         We skip the white space
-         **************************************************************/
-        skip_ws(json, &line);
-        object[object_size-1].type = nextString(json, &line);
-        /*********************************************************
-         *We get the type content and compare to specified content
-         *********************************************************/
-        skip_ws(json, &line);
-        /*====================================================start while loop=================================================*/
-        while((ch = Get_Char(json, &line))==','){
-            skip_ws(json, &line);
-            //Get attribute
-            attribute = nextString(json, &line);
-            //Get ':'
-            skip_ws(json, &line);
-            ch = Get_Char(json, &line);
-            Check_symbol(ch, ':', line);
-            
-            skip_ws(json, &line);
-            /*************************************************if it is camera*************************************/
-            if (strcmp(object[object_size-1].type, "camera")==0) {
-                if (strcmp(attribute,"width")==0) {
-                    object[object_size-1].width = nextNumber(json, &line);
-                    if(object[object_size-1].width<0){
-                        fprintf(stderr, "Error: Line %d: Width cannot be negative\n",line);
-                        exit(-1);
-                        
-                    }
-                }
-                else if (strcmp(attribute,"height")==0){
-                    object[object_size - 1].height = nextNumber(json, &line);
-                    if(object[object_size-1].height<0){
-                        fprintf(stderr, "Error: Line %d: Height cannot be negative\n",line);
-                        exit(-1);
-                        
-                    }
-                }
-                else{ // give us an error, this is not an camera
-                    fprintf(stderr, "Error: Line %d: Key '%s' not supported under 'camera'\n", line, attribute);
-                    exit(1);
-                    
-                }
-                //ch = Get_Char(json, &line);
-                //printf("======the char at here is %c at line %d\n",ch,line);
-                
-            }
-            /*************************************************if it is sphere*************************************/
-            else if(strcmp(object[object_size-1].type, "sphere")==0){
-                if(strcmp(attribute, "color")==0) {
-                    vector = nextVector(json, &line);
-                    for(int i = 0; i < 3; i++) {
-                        if(vector[i] < 0 || vector[i] > 1) {
-                            printf("the color at vector %d is %f\n",i,vector[i]);
-                            fprintf(stderr, "Error: Line %d: Color must be between 0.0 and 1.0\n", line);
-                            exit(1);
-                        }
-                        object[object_size - 1].color[i] = vector[i];
-                    }
-                    free(vector);
-                }
-                else if(strcmp(attribute, "position")==0){
-                    vector = nextVector(json, &line);
-                    for(int i = 0; i < 3; i++) {
-                        object[object_size - 1].position[i] = vector[i];
-                    }
-                    free(vector);
-                }
-                else if(strcmp(attribute, "radius")==0){
-                    object[object_size - 1].radius = nextNumber(json, &line);
-                    if(object[object_size - 1].radius < 0) {
-                        fprintf(stderr, "Error: Line %d: Radius cannot be negative\n", line);
-                        exit(1);
-                    }
-                }
-                else {
-                    fprintf(stderr, "Error: Line %d: Key '%s' not supported under 'sphere'\n", line, attribute);
-                    exit(1);
-                }
-            }
-            /*************************************************if it is plane*************************************/
-            else if(strcmp(object[object_size - 1].type, "plane") == 0){
-                if(strcmp(attribute, "color")==0) {
-                    vector = nextVector(json, &line);
-                    for(int i = 0; i < 3; i++) {
-                        if(vector[i] < 0 || vector[i] > 1) {
-                            
-                            fprintf(stderr, "Error: Line %d: Color must be between 0.0 and 1.0\n", line);
-                            exit(1);
-                        }
-                        object[object_size - 1].color[i] = vector[i];
-                    }
-                    free(vector);
-                }
-                else if(strcmp(attribute, "position")==0) {
-                    vector = nextVector(json, &line);
-                    for(int i = 0; i < 3; i++) {
-                        object[object_size - 1].position[i] = vector[i];
-                    }
-                    free(vector);
-                }
-                else if(strcmp(attribute, "normal")==0) {
-                    vector = nextVector(json, &line);
-                    for(int i = 0; i < 3; i++) {
-                        object[object_size - 1].normal[i] = vector[i];
-                    }
-                    free(vector);
-                }
-                else {
-                    fprintf(stderr, "Error: Line %d: Key '%s' not supported under 'plane'\n", line, attribute);
-                    exit(1);
-                }
-            }
-            /*************************************************if it is quadric*************************************/
-            else if(strcmp(object[object_size - 1].type, "quadric") == 0){
-                if(strcmp(attribute, "color")==0) {
-                    vector = nextVector(json, &line);
-                    for(int i = 0; i < 3; i++) {
-                        if(vector[i] < 0 || vector[i] > 1) {
-                            
-                            fprintf(stderr, "Error: Line %d: Color must be between 0.0 and 1.0\n", line);
-                            exit(1);
-                        }
-                        object[object_size - 1].color[i] = vector[i];
-                    }
-                    free(vector);
-                }
-                else if(strcmp(attribute, "coefficient")==0) {
-                    coefficient = nextCoefficient(json, &line);
-                    for(int i = 0; i < 10; i++) {
-                        object[object_size - 1].coefficient[i] = coefficient[i];
-                    }
-                    free(coefficient);
-                }
-                else {
-                    fprintf(stderr, "Error: Line %d: Key '%s' not supported under 'quadric'\n", line, attribute);
-                    exit(1);
-                }
-            }
-            /*************************************************unknown object*************************************/
-            else {
-                fprintf(stderr, "Error: Line %d: Unknown type %s", line, object[object_size- 1].type);
-                exit(1);
-            }
-            skip_ws(json, &line);
-        }
-        /*====================================================end while loop=================================================*/
-        if(ungetc(ch, json)==EOF){
-            fprintf(stderr, "Error: Line %d: Read error\n", line);
-            exit(1);
-        }
-        skip_ws(json, &line);
-        ch = Get_Char(json, &line);
-        Check_symbol(ch, '}', line);
-        skip_ws(json, &line);
-    }while((ch = Get_Char(json, &line)) == ',');
-    /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ DO While Lopp END @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
-    Check_symbol(ch, ']', line);
-    // Manually get trailing whitespace
-    while((ch = fgetc(json)) != EOF && isspace(ch)) {
-        if(ch == '\n') {
-            line += 1;
-        }
-    }
-    
-    if (ch!=EOF) {
-        fprintf(stderr, "Error: Line %d: Unkown symbol at end-of-file\n", line);
-        exit(1);
-    }
-    else if (!feof(json) && ferror(json)){
-        fprintf(stderr, "Error: Line %d: Read error\n", line);
-        perror("");
-        exit(1);
-    }
-    
-    if(object == NULL) {
-        fprintf(stderr, "Warning: Line %d: Empty array\n", line);
-    }
-    return object;
+    return c;
 }
 
 
-/*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
-void Check_Error(char ch, FILE* json, int line){
-    if (ch == EOF) {
-        if(feof(json)) {
-            fprintf(stderr, "Error: Line %d: Premature end-of-file\n", line);
+// expect_c() checks that the next character is d.  If it is not it emits
+// an error.
+void expect_c(FILE* json, int d) {
+    int c = next_c(json);
+    if (c == d) return;
+    fprintf(stderr, "Error: Expected '%c': %d\n", d, line);
+    exit(1);
+}
+
+
+// skip_ws() skips white space in the file.
+void skip_ws(FILE* json) {
+    int c = next_c(json);
+    while (isspace(c)) {
+        c = next_c(json);
+    }
+    ungetc(c, json);
+}
+
+
+// next_string() gets the next string from the file handle and emits an error
+// if a string can not be obtained.
+char* next_string(FILE* json) {
+    char buffer[129];
+    int c = next_c(json);
+    if (c != '"') {
+        fprintf(stderr, "Error: Expected string on line %d.\n", line);
+        exit(1);
+    }
+    c = next_c(json);
+    int i = 0;
+    while (c != '"') {
+        if (i >= 128) {
+            fprintf(stderr, "Error: Strings longer than 128 characters in length are not supported.\n");
             exit(1);
         }
-        else if(ferror(json)) {
-            fprintf(stderr, "Error: Line %d: Read error\n", line);
-            perror("");
+        if (c == '\\') {
+            fprintf(stderr, "Error: Strings with escape codes are not supported.\n");
             exit(1);
         }
-    }
-}
-
-
-/*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
-void Check_symbol(char ch, char symbol, int line){
-    if(ch != symbol) {
-        fprintf(stderr, "Error: Line %d: Expected '%c'\n", line, symbol);
-        exit(1);
-    }
-}
-
-/*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
-char Get_Char(FILE* json, int* line){
-    char ch = fgetc(json);
-    Check_Error(ch, json, *line);
-    if(ch == '\n') {
-        *line += 1;
-    }
-    return ch;
-}
-/*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
-void skip_ws(FILE* json, int* line){
-    char ch;
-    ch = Get_Char(json, line);
-    while(isspace(ch)) {
-        ch = Get_Char(json, line);
-    }
-    if(ungetc(ch, json) == EOF) {
-        fprintf(stderr, "Error: Line %d: Read error\n", *line);
-        perror("");
-        exit(1);
-    }
-}
-/*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
-/*We use nextString() function to find type attribute and sve this one on the buffer to compare our json file*/
-char* nextString(FILE* json, int* line){
-    int buffer_size = 64; // for safety we set our buffer size is 64
-    int old_size = buffer_size;
-    char ch;
-    int i=0;
-    char* buffer = malloc(sizeof(char)*buffer_size);
-    if(buffer == NULL) {
-        fprintf(stderr, "Error: Line %d: Memory allocation error\n", *line);
-        perror("");
-        exit(1);
-    }
-    ch = Get_Char(json, line);
-    Check_symbol(ch, '"', *line);
-    while(i<(buffer_size-1)&&((ch = Get_Char(json, line))!='"')){ // if we didn't read the whole string
-        if (i==buffer_size-2) {        // our buffer size is too small, and we extend it
-            buffer_size = buffer_size*2;
-            if(old_size != 0 && buffer_size / old_size != 2) {
-                fprintf(stderr, "Error: Line %d: Integer overflow on size\n",*line);
-                exit(1);
-            }
-            old_size = buffer_size;
-            buffer = realloc(buffer, buffer_size);
-            if(old_size != 0 && buffer_size / old_size != 2) {
-                fprintf(stderr, "Error: Line %d: Integer overflow on size\n",*line);
-                perror("");
-                exit(1);
-            }
+        if (c < 32 || c > 126) {
+            fprintf(stderr, "Error: Strings may contain only ascii characters.\n");
+            exit(1);
         }
-        buffer[i++] = ch;
+        buffer[i] = c;
+        i += 1;
+        c = next_c(json);
     }
-    buffer[i] ='\0';
-    
-    return buffer;
+    buffer[i] = 0;
+    return strdup(buffer);
 }
-/*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
-double nextNumber(FILE* json, int* line) {
+
+double next_number(FILE* json) {
     double value;
-    int status = fscanf(json, "%lf", &value);
-    Check_Error(status, json, *line);
-    if(status < 1) {
-        fprintf(stderr, "Error: Line %d: Invalid number\n", *line);
-        exit(1);
+    fscanf(json, "%lf", &value);
+    // Error check this..
+    if (value == EOF) {
+        fprintf(stderr, "Error: Expected a number but found EOF: %d\n", line);
+        return -1;;
     }
-    
-    if(errno == ERANGE) {
-        if(value == 0) {
-            fprintf(stderr, "Error: Line %d: Number underflow\n", *line);
-            exit(1);
-        }
-        if(value == HUGE_VAL || value == -HUGE_VAL) {
-            fprintf(stderr, "Error: Line %d: Number overflow\n", *line);
-            exit(1);
-        }
-    }
-    
+    printf("next_number: %lf\n", value);
     return value;
 }
 
-/*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+double* next_vector(FILE* json) {
+    double* v = malloc(3*sizeof(double));
+    expect_c(json, '[');
+    skip_ws(json);
+    v[0] = next_number(json);
+    skip_ws(json);
+    expect_c(json, ',');
+    skip_ws(json);
+    v[1] = next_number(json);
+    skip_ws(json);
+    expect_c(json, ',');
+    skip_ws(json);
+    v[2] = next_number(json);
+    skip_ws(json);
+    expect_c(json, ']');
+    return v;
+}
 
-double* nextVector(FILE* json, int* line) {
+double* next_coefficient(FILE* json){
+    double* v = malloc(10*sizeof(double));
+    expect_c(json, '[');
+    skip_ws(json);
+    v[0] = next_number(json);
+    for(int i=1;i<10;i++){
+        skip_ws(json);
+        expect_c(json, ',');
+        skip_ws(json);
+        v[i] = next_number(json);
+        printf("the v %d is %f\n",i,v[i]);
+    }
+    skip_ws(json);
+    expect_c(json, ']');
+    return v;
+}
+
+void read_scene(char* filename) {
+    FILE* json = fopen(filename, "r");
     
-    int SIZE = 3; // we have 3 values in our array
-    double* vector = malloc(SIZE * sizeof(*vector));
-    if(vector == NULL) {
-        fprintf(stderr, "Error: Line %d: Memory allocation error\n", *line);
-        perror("");
+    if (json == NULL) {
+        fprintf(stderr, "Error: Could not open file \"%s\"\n", filename);
         exit(1);
     }
+    skip_ws(json);
     
-    /*******'[' is the first char for our array*******/
-    char ch = Get_Char(json, line);
-    Check_symbol(ch, '[', *line);
-    
-    for(int i = 0; i < SIZE; i++) {
-        skip_ws(json, line);
-        vector[i] = nextNumber(json, line);
-        
-        if(i < SIZE - 1) {
-            skip_ws(json, line);
-            ch = Get_Char(json, line);
-            Check_symbol(ch, ',', *line);
-        }
-    }
-    
-    skip_ws(json, line);
-    ch = Get_Char(json, line);
-    Check_symbol(ch, ']', *line);
-    
-    return vector;
-}
-/*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
-double* nextCoefficient(FILE* json, int* line){
-    int SIZE = 10; // we have 10 values in our coefficient array
-    double* coefficient = malloc(SIZE *sizeof(*coefficient));
-    if(coefficient == NULL) {
-        fprintf(stderr, "Error: Line %d: Memory allocation error\n", *line);
-        perror("");
+    // find beginning of the list
+    int c  = next_c(json);
+    if (c != '[') {
+        fprintf(stderr, "Error: read_json: JSON file must begin with [\n");
         exit(1);
     }
+    skip_ws(json);
+    c = next_c(json);
     
-    /*******'[' is the first char for our array*******/
-    char ch = Get_Char(json, line);
-    Check_symbol(ch, '[', *line);
-    
-    
-    for(int i = 0; i < SIZE; i++) {
-        skip_ws(json, line);
-        coefficient[i] = nextNumber(json, line);
-        
-        /**********after we get each number, we need to check the comma****************/
-        if(i < SIZE - 1) {
-            skip_ws(json, line);
-            ch = Get_Char(json, line);
-            Check_symbol(ch, ',', *line);
-        }
+    // check if file empty
+    if (c == ']' || c == EOF) {
+        fprintf(stderr, "Error: read_json: Empty json file\n");
+        exit(1);
     }
+    skip_ws(json);
     
-    /*********after we got all of the number in our array, we need to check the close ']*****/
+    int counter = 0;
     
-    skip_ws(json, line);
-    ch = Get_Char(json, line);
-    Check_symbol(ch, ']', *line);
-
-    
-    return coefficient;
+    // find the objects
+    while (1) {
+        //c  = next_c(json);
+        if (counter > NumberOfObjects) {
+            fprintf(stderr, "Error: read_json: Number of objects is too large: %d\n", line);
+            exit(1);
+        }
+        if (c == ']') {
+            fprintf(stderr, "Error: read_json: Unexpected ']': %d\n", line);
+            fclose(json);
+            return;
+        }
+        if (c == '{') {     // found an object
+            printf("parsing object...\n");
+            skip_ws(json);
+            char *key = next_string(json);
+            if (strcmp(key, "type") != 0) {
+                fprintf(stderr, "Error: read_json: First key of an object must be 'type': %d\n", line);
+                exit(1);
+            }
+            skip_ws(json);
+            // get the colon
+            expect_c(json, ':');
+            skip_ws(json);
+            
+            char *type = next_string(json);
+            OBJECT_TYPE object_type;
+            printf("type is '%s'\n", type);
+            if (strcmp(type, "camera") == 0) {
+                printf("found camera...\n");
+                object_type = camera;
+                strcpy(objects[counter].type, "camera");
+                printf("============\n");
+                
+            }
+            else if (strcmp(type, "sphere") == 0) {
+                printf("found sphere...\n");
+                object_type = sphere;
+                strcpy(objects[counter].type, "sphere");
+            }
+            else if (strcmp(type, "plane") == 0) {
+                printf("found plane...\n");
+                object_type = plane;
+                strcpy(objects[counter].type, "plane");
+            }
+            else if (strcmp(type, "quadric") == 0) {
+                printf("found quadric...\n");
+                object_type = quadric;
+                strcpy(objects[counter].type, "quadric");
+            }
+            else {
+                exit(1);
+            }
+            
+            skip_ws(json);
+            
+            while (1) {
+                //  , }
+                c = next_c(json);
+                if (c == '}') {
+                    // stop parsing this object
+                    break;
+                }
+                else if (c == ',') {
+                    // read another field
+                    skip_ws(json);
+                    char* key = next_string(json);
+                    skip_ws(json);
+                    expect_c(json, ':');
+                    skip_ws(json);
+                    if (strcmp(key, "width") == 0) {
+                        objects[counter].data.camera.width = next_number(json);
+                    }
+                    else if (strcmp(key, "height") == 0) {
+                        objects[counter].data.camera.height = next_number(json);
+                    }
+                    else if (strcmp(key, "radius") == 0) {
+                        objects[counter].data.sphere.radius = next_number(json);
+                    }
+                    else if (strcmp(key, "color") == 0) {
+                        if (object_type == sphere)
+                            objects[counter].data.sphere.color = next_vector(json);
+                        else if (object_type == plane)
+                            objects[counter].data.plane.color = next_vector(json);
+                        else if (object_type == quadric)
+                            objects[counter].data.quadric.color = next_vector(json);
+                        else {
+                            fprintf(stderr, "Error: read_json: Color vector can't be applied here: %d\n", line);
+                            exit(1);
+                        }
+                    }
+                    else if (strcmp(key, "position") == 0) {
+                        if (object_type == sphere)
+                            objects[counter].data.sphere.position = next_vector(json);
+                        else if (object_type == plane)
+                            objects[counter].data.plane.position = next_vector(json);
+                        else {
+                            fprintf(stderr, "Error: read_json: Position vector can't be applied here: %d\n", line);
+                            exit(1);
+                        }
+                        
+                    }
+                    else if (strcmp(key, "normal") == 0) {
+                        if (object_type != plane) {
+                            fprintf(stderr, "Error: read_json: Normal vector can't be applied here: %d\n", line);
+                            exit(1);
+                        }
+                        else
+                            objects[counter].data.plane.normal = next_vector(json);
+                    }
+                    
+                    else if (strcmp(key, "coefficient") == 0) {
+                        if (object_type != quadric) {
+                            fprintf(stderr, "Error: read_json: Normal vector can't be applied here: %d\n", line);
+                            exit(1);
+                        }
+                        else
+                            objects[counter].data.quadric.coefficient = next_coefficient(json);
+                        exit(1);
+                    }
+                    else {
+                        fprintf(stderr, "Error: read_json: '%s' not a valid object: %d\n", key, line);
+                        exit(1);
+                    }
+                    
+                    // do something with key and value
+                    skip_ws(json);
+                }
+                else {
+                    fprintf(stderr, "Error: read_json: Unexpected value '%c': %d\n", c, line);
+                    exit(1);
+                }
+            }
+            skip_ws(json);
+            c = next_c(json);
+            if (c == ',') {
+                // noop
+                skip_ws(json);
+            }
+            else if (c == ']') {
+                printf("end of file\n");
+                fclose(json);
+                return;
+            }
+            else {
+                fprintf(stderr, "Error: read_json: Expecting comma or ]: %d\n", line);
+                exit(1);
+            }
+        }
+        c = next_c(json);
+        counter++;
+    }
 }
-/***********************************************************Test Main function**************************************/
-/*
-int main(int argc, char** argv){
-    readScene(argv[1]);
-    return 0;
-}
-
-
-
-*/
-
 
 
 
