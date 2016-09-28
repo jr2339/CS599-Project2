@@ -40,8 +40,8 @@ int next_c(FILE* json) {
 }
 
 
-// expect_c() checks that the next character is d.  If it is not it emits
-// an error.
+// expect_c() checks that the next character is d.
+// It is not d, give us an error.
 void expect_c(FILE* json, int d) {
     int c = next_c(json);
     if (c == d) return;
@@ -122,6 +122,7 @@ double* next_vector(FILE* json) {
     return v;
 }
 
+// This function at here is for quadric
 double* next_coefficient(FILE* json){
     double* v = malloc(10*sizeof(double));
     expect_c(json, '[');
@@ -132,13 +133,13 @@ double* next_coefficient(FILE* json){
         expect_c(json, ',');
         skip_ws(json);
         v[i] = next_number(json);
-        printf("the v %d is %f\n",i,v[i]);
     }
     skip_ws(json);
     expect_c(json, ']');
     return v;
 }
 
+// Parasing the Json file
 void read_scene(char* filename) {
     FILE* json = fopen(filename, "r");
     
@@ -166,9 +167,9 @@ void read_scene(char* filename) {
     
     int counter = 0;
     
+    
     // find the objects
     while (1) {
-        //c  = next_c(json);
         if (counter > NumberOfObjects) {
             fprintf(stderr, "Error: read_json: Number of objects is too large: %d\n", line);
             exit(1);
@@ -179,7 +180,8 @@ void read_scene(char* filename) {
             return;
         }
         if (c == '{') {     // found an object
-            printf("parsing object...\n");
+            printf("***************** We find A New Object. Now, we will parsing it *****************\n");
+            printf("*********************************************************************************\n");
             skip_ws(json);
             char *key = next_string(json);
             if (strcmp(key, "type") != 0) {
@@ -193,26 +195,23 @@ void read_scene(char* filename) {
             
             char *type = next_string(json);
             OBJECT_TYPE object_type;
-            printf("type is '%s'\n", type);
             if (strcmp(type, "camera") == 0) {
-                printf("found camera...\n");
+                printf("============================== This Object is camera =============================\n");
                 object_type = camera;
                 strcpy(objects[counter].type, "camera");
-                printf("============\n");
-                
             }
             else if (strcmp(type, "sphere") == 0) {
-                printf("found sphere...\n");
+                printf("============================== This Object is sphere =============================\n");
                 object_type = sphere;
                 strcpy(objects[counter].type, "sphere");
             }
             else if (strcmp(type, "plane") == 0) {
-                printf("found plane...\n");
+                printf("============================== This Object is plane ==============================\n");
                 object_type = plane;
                 strcpy(objects[counter].type, "plane");
             }
             else if (strcmp(type, "quadric") == 0) {
-                printf("found quadric...\n");
+                printf("============================= This Object is quadric =============================\n");
                 object_type = quadric;
                 strcpy(objects[counter].type, "quadric");
             }
@@ -243,7 +242,7 @@ void read_scene(char* filename) {
                         objects[counter].data.camera.height = next_number(json);
                     }
                     else if (strcmp(key, "radius") == 0) {
-                        objects[counter].data.sphere.radius = next_number(json);
+                         objects[counter].data.sphere.radius = next_number(json);
                     }
                     else if (strcmp(key, "color") == 0) {
                         if (object_type == sphere)
@@ -283,7 +282,7 @@ void read_scene(char* filename) {
                             exit(1);
                         }
                         else
-                            objects[counter].data.quadric.coefficient = next_coefficient(json);
+                             objects[counter].data.quadric.coefficient = next_coefficient(json);
                         exit(1);
                     }
                     else {
@@ -319,8 +318,6 @@ void read_scene(char* filename) {
         counter++;
     }
 }
-
-
 
 
 
