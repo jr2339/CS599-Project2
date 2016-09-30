@@ -14,6 +14,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "ppm.h"
+#define NumberOfObjects 20 // In our Json File, we have 20 Objects
+#define CAM 1
+#define SPH 2
+#define PLAN 3
+#define QUAD 4
 /********************Here is what I am doing for the first time******************
 typedef struct Object{
     char *type;
@@ -56,7 +62,7 @@ typedef struct QUADRIC {
 
 /*DEFINE STRUCTURE  FOR JASON FILE WHICH STROE OUR OBJECT*/
 typedef struct OBJECT{
-    char type[10];
+    int type;
     union {
         CAMERA camera;
         SPHERE sphere;
@@ -67,17 +73,14 @@ typedef struct OBJECT{
 
 
 
-typedef enum OBJECT_TYPE{
-    camera,
-    sphere,
-    plane,
-    quadric
-} OBJECT_TYPE;
 
 
 
 
 
+extern int line;  // global variable, it will tells us which line is not correct
+
+extern OBJECT objects[NumberOfObjects]; // Allocate an array for All Objects in Json File
 
 
 

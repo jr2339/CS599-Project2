@@ -16,7 +16,7 @@
 /*******************************************This is Dr.Palmer's code*******************************/
 // next_c wraps the getc function that provides error checking and line #
 // Problem: if we do ungetc, it could screw us up on the line #
-#define NumberOfObjects 20 // In our Json File, we have 20 Objects
+
 
 int line = 1;  // global variable, it will tells us which line is not correct
 
@@ -194,26 +194,26 @@ void read_scene(char* filename) {
             skip_ws(json);
             
             char *type = next_string(json);
-            OBJECT_TYPE object_type;
+            int object_type;
             if (strcmp(type, "camera") == 0) {
                 printf("============================== This Object is camera =============================\n");
-                object_type = camera;
-                strcpy(objects[counter].type, "camera");
+                object_type = CAM;
+                objects[counter].type = CAM;
             }
             else if (strcmp(type, "sphere") == 0) {
                 printf("============================== This Object is sphere =============================\n");
-                object_type = sphere;
-                strcpy(objects[counter].type, "sphere");
+                object_type = SPH;
+                objects[counter].type = SPH;
             }
             else if (strcmp(type, "plane") == 0) {
                 printf("============================== This Object is plane ==============================\n");
-                object_type = plane;
-                strcpy(objects[counter].type, "plane");
+                object_type = PLAN;
+                objects[counter].type = PLAN;
             }
             else if (strcmp(type, "quadric") == 0) {
                 printf("============================= This Object is quadric =============================\n");
-                object_type = quadric;
-                strcpy(objects[counter].type, "quadric");
+                object_type = QUAD;
+                objects[counter].type = QUAD;
             }
             else {
                 exit(1);
@@ -245,11 +245,11 @@ void read_scene(char* filename) {
                          objects[counter].data.sphere.radius = next_number(json);
                     }
                     else if (strcmp(key, "color") == 0) {
-                        if (object_type == sphere)
+                        if (object_type == SPH)
                             objects[counter].data.sphere.color = next_vector(json);
-                        else if (object_type == plane)
+                        else if (object_type == PLAN)
                             objects[counter].data.plane.color = next_vector(json);
-                        else if (object_type == quadric)
+                        else if (object_type == QUAD)
                             objects[counter].data.quadric.color = next_vector(json);
                         else {
                             fprintf(stderr, "Error: read_json: Color vector can't be applied here: %d\n", line);
@@ -257,9 +257,9 @@ void read_scene(char* filename) {
                         }
                     }
                     else if (strcmp(key, "position") == 0) {
-                        if (object_type == sphere)
+                        if (object_type == SPH)
                             objects[counter].data.sphere.position = next_vector(json);
-                        else if (object_type == plane)
+                        else if (object_type == PLAN)
                             objects[counter].data.plane.position = next_vector(json);
                         else {
                             fprintf(stderr, "Error: read_json: Position vector can't be applied here: %d\n", line);
@@ -268,7 +268,7 @@ void read_scene(char* filename) {
                         
                     }
                     else if (strcmp(key, "normal") == 0) {
-                        if (object_type != plane) {
+                        if (object_type != PLAN) {
                             fprintf(stderr, "Error: read_json: Normal vector can't be applied here: %d\n", line);
                             exit(1);
                         }
@@ -277,7 +277,7 @@ void read_scene(char* filename) {
                     }
                     
                     else if (strcmp(key, "coefficient") == 0) {
-                        if (object_type != quadric) {
+                        if (object_type != QUAD) {
                             fprintf(stderr, "Error: read_json: Normal vector can't be applied here: %d\n", line);
                             exit(1);
                         }
@@ -319,12 +319,39 @@ void read_scene(char* filename) {
     }
 }
 
-
-
-
-
-
-
-
-
-
+//Get Objects
+void get_objects(OBJECT *object) {
+    int i = 0;
+    while (i < NumberOfObjects && object[i].type > 0) {
+        printf("object type: %d\n", object[i].type);
+        if (object[i].type == CAM) {
+            printf("height: %lf\n", object[i].data.camera.height);
+            printf("width: %lf\n", object[i].data.camera.width);
+        }
+        else if (object[i].type == SPH) {
+            printf("color: %lf %lf %lf\n", object[i].data.sphere.color[0],
+                   object[i].data.sphere.color[1],
+                   object[i].data.sphere.color[2]);
+            printf("position: %lf %lf %lf\n", object[i].data.sphere.position[0],
+                   object[i].data.sphere.position[1],
+                   object[i].data.sphere.position[2]);
+            printf("radius: %lf\n", object[i].data.sphere.radius);
+        }
+        else if (object[i].type == PLAN) {
+            printf("color: %lf %lf %lf\n", object[i].data.plane.color[0],
+                   object[i].data.plane.color[1],
+                   object[i].data.plane.color[2]);
+            printf("position: %lf %lf %lf\n", object[i].data.plane.position[0],
+                   object[i].data.plane.position[1],
+                   object[i].data.plane.position[2]);
+            printf("normal: %lf %lf %lf\n", object[i].data.plane.normal[0],
+                   object[i].data.plane.normal[1],
+                   object[i].data.plane.normal[2]);
+        }
+        else {
+            printf("unsupported value\n");
+        }
+        i++;
+    }
+    printf("end at i=%d\n", i);
+}
