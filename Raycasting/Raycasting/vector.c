@@ -17,6 +17,14 @@ static inline double Vector_len(Vector a){
     return sqrt(sqr(a[0])+sqr(a[1])+sqr(a[2]));
 }
 
+static inline void Vector_Unit(Vector in, Vector out){
+    double len = Vector_len(in);
+    out[0] = in[0]/len;
+    out[1] = in[1]/len;
+    out[2] = in[2]/len;
+    
+}
+
 
 static inline void Vector_add(Vector a, Vector b, Vector c){
     c[0] = a[0] + b[0];
@@ -50,12 +58,15 @@ static inline void Vector_corss(Vector a, Vector b, Vector c){
     c[2] = a[0]*b[1] - a[1]*b[0];
 }
 
-static inline void normalize(double *v){
-    double len = sqrt(sqr(v[0]) + sqr(v[1]) + sqr(v[2]));
-    v[0] = v[0]/len;
-    v[1] = v[1]/len;
-    v[2] = v[2]/len;
+static inline void normalize(double *v) {
+    double len = sqr(v[0]) + sqr(v[1]) + sqr(v[2]);
+    len = sqrt(len);
+    v[0] /= len;
+    v[1] /= len;
+    v[2] /= len;
 }
+
+
 
 
 
