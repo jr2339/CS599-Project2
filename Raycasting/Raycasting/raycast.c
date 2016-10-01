@@ -41,25 +41,52 @@ void shade_pixel(double *color, int row, int col,Image *image){
  
  */
 double plane_intersection(double *Ro, double *Rd, double *Pos, double *Norm){
+    double alph,delta;
     normalize(Norm);
-    /*determine if plane is parallel to the ray
-     *if it is parallel to the ray, we can't do
-     *intersection
+    /*
+     *if the plane is parallel to the ray
+     * return -1;
      */
-    double denominator = Vector_dot(Norm, Rd);
-    if(denominator == 0){
+    Vector incident_vector;
+    Vector_sub(Pos, Ro, incident_vector);
+    
+    alph = Vector_dot(Norm, incident_vector); //length(Norm) * length(incident_vector)*cos(thea1)
+    
+    // the plane is parallel to the ray
+    if (fabs(alph) <0.0001) {
         return -1;
     }
-    Vector difference;
-    Vector_sub(Ro, Pos, difference);
     
-    double t = -((Vector_dot(difference, Norm))/denominator);
     
-    if (t < 0.0) {
+    delta = Vector_dot(Norm, Rd); //length(Norm) * length(Rd) * cos(thea2)
+    
+    
+    double t = alph/delta; // whcih means we check thea1 and thea2
+    
+    if (t>0.0) { // reflection, no intersection
         return -1;
     }
-    return t;
-}
+    
+    
+    return t; // return something, but not t , need to figure out it
+
+    
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
