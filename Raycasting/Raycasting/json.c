@@ -17,6 +17,7 @@
 // next_c wraps the getc function that provides error checking and line #
 // Problem: if we do ungetc, it could screw us up on the line #
 
+#define MAX_COLOR_VAL 255       // maximum value to use for colors 0-255
 
 int line = 1;  // global variable, it will tells us which line is not correct
 
@@ -140,11 +141,10 @@ double* next_coefficient(FILE* json){
 }
 
 // Parasing the Json file
-void read_scene(char* filename) {
-    FILE* json = fopen(filename, "r");
+void read_scene(FILE* json) {
     
     if (json == NULL) {
-        fprintf(stderr, "Error: Could not open file \"%s\"\n", filename);
+        fprintf(stderr, "Error: Could not open file\n");
         exit(1);
     }
     skip_ws(json);

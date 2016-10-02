@@ -17,12 +17,12 @@
 typedef double Vector[3]; // array of double values to represent
 
 
-static inline double sqr(double v);
-static inline double Vector_len(Vector a);
-static inline void Vector_add(Vector a, Vector b, Vector c);
-static inline void Vector_sub(Vector a, Vector b, Vector c);
-static inline void Vector_scale(Vector a, double s, Vector b);
-static inline double Vector_dot(Vector a, Vector b);
-static inline void Vector_corss(Vector a, Vector b, Vector c);
-static inline void normalize(double *v);
+double sqr(double v);
+double Vector_len(Vector a);
+void Vector_add(Vector a, Vector b, Vector c);
+void Vector_sub(Vector a, Vector b, Vector c);
+void Vector_scale(Vector a, double s, Vector b);
+double Vector_dot(Vector a, Vector b);
+void Vector_corss(Vector a, Vector b, Vector c);
+void normalize(double *v);
 #endif /* vector_h */

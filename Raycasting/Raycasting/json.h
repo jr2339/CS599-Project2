@@ -72,16 +72,11 @@ typedef struct OBJECT{
 } OBJECT;
 
 
-
-
-
-
-
-
 extern int line;  // global variable, it will tells us which line is not correct
 
 extern OBJECT objects[NumberOfObjects]; // Allocate an array for All Objects in Json File
-
+void read_scene(FILE* json);
+void get_objects(OBJECT *object);
 
 
 

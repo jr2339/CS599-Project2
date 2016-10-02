@@ -23,5 +23,11 @@ typedef struct ray{
     double direction[3];
 } ray;
 
+int get_camera(OBJECT *objects);
+void shade_pixel(double *color, int row, int col,image *image);
+double plane_intersection(double *Ro, double *Rd, double *Pos, double *Norm);
+double sphere_intersection(double *Ro, double *Rd, double *C, double r);
+void raycast_scene(image *image, double cam_width, double cam_height, OBJECT *object);
+
 
 #endif /* raycast_h */

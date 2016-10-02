@@ -5,158 +5,572 @@
 //  Created by jr2339 on 9/8/16.
 //  Copyright © 2016 jr2339. All rights reserved.
 //
-#include <stdlib.h>
+
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
+#include <unistd.h>
 #include "ppm.h"
 
 
-Image *BufferCreate(int width, int height,int magic_number){
-    Image *buffer = (Image *)malloc(sizeof(Image));
-    if(!buffer){
-        fprintf(stderr, "can't allocate memory for new image");
-        exit(1);
-    }
-    else{
-        buffer->width = width;
-        buffer->height = height;
-        buffer->magic_number = magic_number;
-        //allocate buffer
-        buffer->data = (u_char *)malloc(width*height*3);// G, R, B three colors
-    }
-    if(!buffer->data){
-        perror("can't allocate memory for new image");
-    }
-    return buffer;
-}
-/**************************************************************************************************************
- **************************************************************************************************************/
-// readPPMHeader help us to detemine which format(such as P1, P2...) for our source image
+/*******************************************************//**
+ * Utility functions
+ * ********************************************************/
 
-void readPPMHeader(FILE *f_source, int *width, int *height,int *magic_address){
-    char ch;
-    int maxval;
+/**
+ * Checks for and moves over consecutive comments in a file recursively
+ * @param fh file stream being checked
+ * @param c The last character that was read from the file.
+ * @return 0 on success, -1 on error
+ */
+int check_for_comments(FILE *fh, char c) {
+    /* jumps over comments and onto the next line, then recursively checks again */
+    // skip any leading white space
+    while (isspace(c) && c != EOF) { c = fgetc(fh); }
+
+    // base case, current char, c, is not a pound sign
+    if (c != '#') {
+        fseek(fh, -1, SEEK_CUR); // backup one character
+        return 0;
+    }
+    else { // c is a comment, so read to end of line
+        while (c != '\n' && c != EOF) {
+            c = fgetc(fh);
+        }
+        if (c == EOF) {
+            fprintf(stderr, "Error: check_for_comments: Premature end of file\n");
+            return -1;
+        }
+        else { // c is '\n', so grab the next char and check recursively
+            return check_for_comments(fh, fgetc(fh));
+        }
+    }
+}
+
+int check_for_newline(char c) {
+    if (!isspace(c)) {
+        fprintf(stderr, "Error: check_for_newline: missing newline or space\n");
+        return -1;
+    }
+    return 0;
+}
+
+int bytes_left(FILE *fh) {
+    // returns the number of bytes left in a file
+    int bytes;
+    int pos = (int)ftell(fh);    // get current pointer
+    fseek(fh, 0, SEEK_END);
+    int end = (int)ftell(fh);
+    bytes = end - pos;
+    fseek(fh, pos, SEEK_SET); // put the pointer back
+    if (bytes <= 0) {
+        fprintf(stderr, "Error: bytes_left: bytes remaining <= 0\n");
+        return -1;
+    }
+    return bytes;
+}
+
+
+/*******************************************************//**
+ * PPM read/write functions
+ * ********************************************************/
+
+/**
+ * Reads the header information from a ppm file from a file stream into
+ * a header struct
+ * @param fh file handler
+ * @param hdr header struct to store the information from the fh stream
+ * @return 0 on success, -1 on error
+ */
+int read_header(FILE *fh, header *hdr) {
+    int ret_val;    // holds temp return value for reading each section of header
+    char c;         // temporary char read in from file
+    boolean is_p3;  // determines file type being P3 or P6
+
+    // read magic number
+    c = fgetc(fh);
+    if (c != 'P') {
+        fprintf(stderr, "Error: read_header: Invalid ppm file. First character is not 'P'\n");
+        return -1;
+    }
+    c = fgetc(fh);
+    if (c == '3') {
+        is_p3 = TRUE;
+    }
+    else if (c == '6') {
+        is_p3 = FALSE;
+    }
+    else {
+        fprintf(stderr, "Error: read_header: Unsupported magic number found in header\n");
+        return -1;
+    }
+    // set header struct magic number
+    if (is_p3) {
+        hdr->file_type = 3;
+    }
+    else {
+        hdr->file_type = 6;
+    }
+    // check for newline and comments
+    ret_val = check_for_newline(fgetc(fh));
+    if (ret_val < 0) {
+        fprintf(stderr, "Error: read_header: No separator found after magic number\n");
+        return -1;
+    }
+    ret_val = check_for_comments(fh, fgetc(fh));
+    if (ret_val < 0) {
+        fprintf(stderr, "Error: read_header: Problem reading comment after magic number\n");
+        return -1;
+    }
+
+    // read width
+    fscanf(fh, "%d", &(hdr->width));
+    if (hdr->width <= 0) {
+        fprintf(stderr, "Error: read_header: Image width cannot be less than zero\n");
+        return -1;
+    }
+    if (hdr->width == EOF) {
+        fprintf(stderr, "Error: read_header: Image width not found. Premature EOF\n");
+        return -1;
+    }
+    // check for newline and comments
+    ret_val = check_for_newline(fgetc(fh));
+    if (ret_val < 0) {
+        fprintf(stderr, "Error: read_header: No separator found after width\n");
+        return -1;
+    }
+    ret_val = check_for_comments(fh, fgetc(fh));
+    if (ret_val < 0) {
+        fprintf(stderr, "Error: read_header: Problem reading comment after width\n");
+        return -1;
+    }
+
+    // read height
+    ret_val = fscanf(fh, "%d", &(hdr->height));
+    if (ret_val <= 0 || ret_val == EOF) {
+        fprintf(stderr, "Error: read_header: Image height not found\n");
+        return -1;
+    }
+    // check for newline and comments
+    ret_val = check_for_newline(fgetc(fh));
+    if (ret_val < 0) {
+        fprintf(stderr, "Error: read_header: No separator found after height\n");
+        return -1;
+    }
+    ret_val = check_for_comments(fh, fgetc(fh));
+    if (ret_val < 0) {
+        fprintf(stderr, "Error: read_header: Problem reading comment after height\n");
+        return -1;
+    }
     
-    // if the format is not P3 or P6 or P7, it gives us a error
-    if(fscanf(f_source, "P%c\n",&ch) !=1 || (ch!='3'&& ch!='6'&& ch!='7')){
-        //ch will point to the first word in our file which should be P1, P3 or P7
-        fprintf(stderr,"file is not in PPM format, we can't read it");
-        exit(1);
-    };
-    *magic_address = ch - '0';
-    printf("magic address %d \n",*magic_address);
-    /*skip the comments*/
-    ch = getc(f_source); // ch is int
-    /*
-     gets the next character (an unsigned char) from the specified
-     stream and advances the position indicator for the stream.
-     */
-    while(ch =='#'){
-        do{
-            ch=getc(f_source);
-        }
-        while(ch!='\n'); //read to the end of the line
-        ch=getc(f_source);
+    // read max color value
+    ret_val = fscanf(fh, "%d", &(hdr->max_color_val));
+    if (ret_val <= 0 || ret_val == EOF) {
+        fprintf(stderr, "Error: read_header: Max color value not found\n");
+        return -1;
     }
-    if(!isdigit(ch)){
-        fprintf(stderr,"can't read header information from PPM format");
+    // check bounds on max color value
+    if (hdr->max_color_val > 255 || hdr->max_color_val < 0) {
+        fprintf(stderr, "Error: max color value must be >= 0 and <= 255\n");
+        return -1;
     }
-    else{
-        ungetc(ch, f_source); //put that digital back
+    // check for newline and comments for the last time
+    ret_val = check_for_newline(fgetc(fh));
+    if (ret_val < 0) {
+        fprintf(stderr, "Error: read_header: No separator found after max color value\n");
+        return -1;
     }
-    //read the width, height,amd maximum value for a pixel
-    fscanf(f_source, "%d %d %d\n",width,height,&maxval);
-    if(maxval >= 65336 ||maxval <= 0){
-        fprintf(stderr,"image is not ture-color(8byte), read failed");
-        exit(1);
+    ret_val = check_for_comments(fh, fgetc(fh));
+    if (ret_val < 0) {
+        fprintf(stderr, "Error: read_header: Problem reading comment after max color value\n");
+        return -1;
     }
+
+    return 0;
 }
 
-/**************************************************************************************************************
- **************************************************************************************************************/
-
-
-
-Image *ImageRead(const char *filename){
-    int width,height,size,magic_number;
-    size_t num;
-    //u_char *p;
-    Image *buffer = (Image *)malloc(sizeof(Image));
-    FILE *fp = fopen(filename,"r");
-    if(!buffer){
-        fprintf(stderr,"Can't allocate memory for new image");
-        exit(1);
-    }
-    if(!fp){
-        fprintf(stderr,"can't open file for reading");
-        exit(1);
-        
-    }
-    readPPMHeader(fp, &width, &height,&magic_number);
-    size = width * height *3;
-    buffer = BufferCreate(width, height, magic_number);
-    if(!buffer->data){
-        fprintf(stderr,"can't allocate memory");
-        exit(1);
-    }else{
-        if(magic_number>=4 &&magic_number<=7){
-            num = fread((void *) buffer->data, 1, (size_t) size, fp);
-            if (num != size) {
-                fprintf(stderr,"cannot read image datat from file \n");
-                exit(1);
-            }
-
+/**
+ * Writes ppm P6 image data (pixels) to a file stream
+ * @param fh file handler
+ * @param img image struct holding image data to be written
+ * @return 0 on success, -1 on error
+ */
+int write_p6_data(FILE *fh, image *img) {
+    int i,j;
+    for (i=0; i<(img->height); i++) {
+        for (j=0; j<(img->width); j++) {
+            fwrite(&(img->pixmap[i * img->width + j].r), 1, 1, fh);
+            fwrite(&(img->pixmap[i * img->width + j].g), 1, 1, fh);
+            fwrite(&(img->pixmap[i * img->width + j].b), 1, 1, fh);
         }
-        else if(magic_number>=0 &&magic_number<=3){
-            int i,j, *pixel;
-            for(i=0;i<height;i++){
-                for(j=0;j<width;j++){
-                    fscanf(fp, "%d ",pixel);
-                    buffer->data[i*width*3+3*j] = *pixel;
-                    fscanf(fp, "%d ",pixel);
-                    buffer->data[i*width*3+3*j+1] = *pixel;
-                    fscanf(fp, "%d ",pixel);
-                    buffer->data[i*width*3+3*j+2] = *pixel;
+    }
+    return 0;
+}
 
+/**
+ * Reads the pixel data from a P6 ppm file from a file stream into
+ * an img struct
+ * @param fh input file pointer
+ * @param img initially empty. Place to store image data read from fh
+ * @return 0 on success, -1 on error
+ */
+int read_p6_data(FILE *fh, image *img) {
+    // reads p6 data and stores in buffer
+    // read all remaining data from image into buffer
+    int b = bytes_left(fh);
+    // check for error reading bytes_left()
+    if (b < 0) {
+        fprintf(stderr, "Error: read_p6_data: Problem reading remaining bytes in image\n");
+        return -1;
+    }
+
+    // create temp buffer for image data + 1 for null char
+    unsigned char data[b+1];
+    size_t read;
+
+    // read the rest of the file and check that what remains is the right size
+    if ((read = fread(data, 1, b, fh)) != 0) {
+        fprintf(stderr, "Error: read_p6_data: fread() returned an error when reading data\n");
+        return -1;
+    }
+
+    // double check number of bytes actually read is correct
+    if (read < b || read > b) {
+        fprintf(stderr, "Error: read_p6_data: image data doesn't match header dimensions\n");
+        return -1;
+    }
+
+    int ptr = 0;        // data pointer/incrementer
+    int i, j, k;        // loop variables
+    unsigned char num;  // build a number from chars read in from file
+
+    // loop through buffer and populate RGBPixel array
+    for (i=0; i<img->height; i++) {
+        for (j=0; j<img->width; j++) {
+            RGBPixel px;
+            px = img->pixmap[0]; // init
+            for (k=0; k<3; k++) {
+                // check that we haven't read more than what is available
+                if (ptr >= b) {
+                    fprintf(stderr, "Error: read_p6_data: Image data is missing or header dimensions are wrong\n");
+                    return -1;
                 }
-                
-                //fprintf(buffer, "\n");
-            }
-
-        }
-    }
-        return buffer;
-}
-
-/**************************************************************************************************************
- **************************************************************************************************************/
-
-void ImageWrite(Image *buffer, const char *filename,int format){
-    printf("the magic number is P%d \n", buffer->magic_number);
-    size_t num;
-    int size = buffer->width * buffer->height * 3;
-    //printf("the size is %d \n", size);
-    FILE *f_des = fopen(filename, "w"); //filename looks like /home/jun
-    if (!f_des){
-        fprintf(stderr,"cannot open file for writing");
-    }else{
-        fprintf(f_des, "P%d\n%d %d\n%d\n",format,buffer->width, buffer->height, 255);
-        //p4-p7
-        if(format >=4 &&format<=7){
-            num = fwrite((void *) buffer->data, 1, (size_t) size, f_des);
-        }
-        else if(format>=0 && format<=3){
-            int i,j;
-            for(i=0;i<buffer->height;i++){
-                for(j=0;j<buffer->width;j++){
-                     fprintf(f_des, "%d ",buffer->data[i*buffer->width*3+3*j]);
-                     fprintf(f_des, "%d ",buffer->data[i*buffer->width*3+3*j+1]);
-                     fprintf(f_des, "%d ",buffer->data[i*buffer->width*3+3*j+2]);
+                num = data[ptr++];
+                if (num < 0 || num > img->max_color_val) {
+                    fprintf(stderr, "Error: read_p6_data: found a pixel value out of range\n");
+                    return -1;
                 }
-                
-                 fprintf(f_des, "\n");
+
+                if (k == 0) {
+                    px.r = num;
+                }
+                else if (k == 1) {
+                    px.g = num;
+                }
+                else {
+                    px.b = num;
+                }
+            }
+            img->pixmap[i * img->width + j] = px;
+        }
+    }
+    // check if there's still data left
+    if (ptr < b) {
+        fprintf(stderr, "Error: read_p6_data: Extra image data was found in file\n");
+        return -1;
+    }
+    return 0;
+}
+
+/**
+ * Reads the pixel data from a P3 ppm file from a file stream into
+ * an img struct
+ * @param fh input file pointer
+ * @param img initially empty. Place to store image data read from fh
+ * @return 0 on success, -1 on error
+ */
+int read_p3_data(FILE *fh, image *img) {
+    
+    // read all remaining data from image into buffer
+    int b = bytes_left(fh); 
+    // check for error reading bytes_left()
+    if (b < 0) {
+        fprintf(stderr, "Error: read_p3_data: reading remaining bytes\n");
+        return -1;
+    }
+
+    // create temp buffer for image data + 1 for null char
+    char data[b+1];
+    char *data_p = data;
+    size_t read;
+
+    // read the rest of the file and check that what remains is the right size
+    if ((read = fread(data, 1, b, fh)) !=0) {
+        fprintf(stderr, "Error: read_p3_data: fread returned an error when reading data\n");
+        return -1;
+    }
+    
+    // double check number of bytes actually read is correct
+    if (read < b || read > b) {
+        fprintf(stderr, "Error: read_p3_data: image data doesn't match header dimensions\n");
+        return -1;
+    }
+    // null terminate the buffer
+    data[b] = '\0';
+    // make sure we're not starting at a space or newline
+    while (isspace(*data_p) && (*data_p != '\0')) { data_p++; };
+    
+    int i, j, k;        // loop variables
+    int ptr;            // current index of the num array
+    char num[4];        // holds string repr. of a 0-255 value
+
+    // loop through buffer and populate RGBPixel array
+    for (i=0; i<img->height; i++) {
+        for (j=0; j<img->width; j++) {
+            RGBPixel px;
+            for (k=0; k<3; k++) {
+                ptr = 0;
+                while (TRUE) {
+                    // check that we haven't read more than what is available
+                    if (*data_p == '\0') {
+                        fprintf(stderr, "Error: read_p3_data: Image data is missing or header dimensions are wrong\n");
+                        return -1;
+                    }
+                    if (isspace(*data_p)) {
+                        *(num + ptr) = '\0';
+                        while (isspace(*data_p) && (*data_p != '\0')) { 
+                            data_p++; 
+                        }
+                        break;
+                    }
+                    else {
+                        *(num + ptr) = *data_p++;
+                        ptr++;
+                    }
+                }
+
+                if (atoi(num) < 0 || atoi(num) > img->max_color_val) {
+                    fprintf(stderr, "Error: read_p3_data: found a pixel value out of range\n");
+                    return -1;
+                }
+
+                if (k == 0) {
+                    px.r = atoi(num);
+                }
+                else if (k == 1) {
+                    px.g = atoi(num);
+                }
+                else {
+                    px.b = atoi(num);
+                }
+                img->pixmap[i * img->width + j] = px;
             }
         }
-    fclose(f_des);
     }
+
+    // skip any white space that may remain at the end of the data
+    while (isspace(*data_p) && (*data_p != '\0')) { data_p++; };
+    
+    // check if there's still data left
+    if (*data_p != '\0') {
+        fprintf(stderr, "Error: read_p3_data: Extra image data was found in file\n");
+        return -1;
+    }
+    return 0;
 }
+
+/**
+ * Writes ppm P3 image data (pixels) to a file stream
+ * @param fh file handler
+ * @param img image struct holding image data to be written
+ * @return 0 on success, -1 on error
+ */
+int write_p3_data(FILE *fh, image *img) {
+    int i,j;
+    for (i=0; i<(img->height); i++) {
+        for (j=0; j<(img->width); j++) {
+            fprintf(fh, "%d ", img->pixmap[i * img->width + j].r);
+            fprintf(fh, "%d ", img->pixmap[i * img->width + j].g);
+            fprintf(fh, "%d\n", img->pixmap[i * img->width + j].b);
+        }
+    }
+    return 0;
+}
+
+/**
+ * Writes ppm header struct information to a file stream
+ * @param fh file handler
+ * @param hdr header struct
+ * @return 0 on success, -1 on error
+ */
+int write_header(FILE *fh, header *hdr) {
+    int ret_val = 0;
+    ret_val = fputs("P", fh);
+    if (ret_val < 0) {
+        return -1;
+    }
+    ret_val = fprintf(fh, "%d", hdr->file_type);
+    if (ret_val < 0) {
+        return -2;
+    }
+    ret_val = fputs("\n", fh);
+    if (ret_val < 0) {
+        return -3;
+    }
+    ret_val = fprintf(fh, "%d %d\n%d\n", hdr->width,
+                                         hdr->height,
+                                         hdr->max_color_val);
+    if (ret_val < 0) {
+        return -4;
+    }
+    return ret_val;
+}
+
+void create_ppm(FILE *fh, int type, image *img) {
+    // error checking
+    if (type != 3 && type != 6) {
+        fprintf(stderr, "Error: create_ppm: type must be 3 or 6\n");
+        exit(1);
+    }
+    // create header
+    header hdr;
+    hdr.file_type = type;
+    hdr.width = img->width;
+    hdr.height = img->height;
+    hdr.max_color_val = 255;
+    // write header
+    int res = write_header(fh, &hdr);
+    if (res < 0) {
+        fprintf(stderr, "Error: create_ppm: Problem writing header to file\n");
+        exit(1);
+    }
+    // write data
+    if (type == 3)
+        write_p3_data(fh, img);
+    else
+        write_p6_data(fh, img);
+} 
+
+/* TESTING helper functions */
+void print_pixels(RGBPixel *pixmap, int width, int height) {
+    int i,j;
+    int counter = 0;
+    for (i=0; i<height; i++) {
+        for (j=0; j<width; j++) {
+            counter++;
+            printf("r: %d, ", pixmap[i * width + j].r);
+            printf("g: %d ,", pixmap[i * width + j].g);
+            printf("b: %d\n", pixmap[i * width + j].b);
+        }
+    }
+    printf("print_pixels count: %d\n", counter);
+}
+
+
+/*******************************************************//**
+ * main
+ * ********************************************************/
+/*int main(int argc, char *argv[]){
+    if (argc != 4) {
+        fprintf(stderr, "Error: main: ppmrw requires 3 arguments\n");
+        return 1;
+    }
+
+    FILE *in_ptr;
+    FILE *out_ptr;
+    int ret_val;
+    char c;
+
+    in_ptr = fopen(argv[2], "rb");  // input file pointer
+    out_ptr = fopen(argv[3], "wb"); // output file pointer
+    
+    // error check the file pointers
+    if (in_ptr == NULL) {
+        fprintf(stderr, "Error: main: Input file can't be opened\n");
+        return 1;
+    }
+    if (out_ptr == NULL) {
+        fprintf(stderr, "Error: main: Output file can't be opened\n");
+        return 1;
+    }
+
+    // allocate space for header information
+    header *hdr = (header *)malloc(sizeof(header));
+*/
+
+    /******************************//**
+     * read data from input file
+     *********************************/
+/*
+    // read header of input file
+    ret_val = read_header(in_ptr, hdr);
+    
+    if (ret_val < 0) {
+        fprintf(stderr, "Error: main: Problem reading header\n");
+        return 1;
+    }
+
+    // store the file type of the origin file so we know what we're converting from
+    int origin_file_type = hdr->file_type;
+    // change the header file type to what the destinationn file type should be
+    if (atoi(argv[1]) == 3) {
+        hdr->file_type = 3;
+    }
+    else if (atoi(argv[1]) == 6) {
+        hdr->file_type = 6;
+    }
+    else {
+        fprintf(stderr, "Error: main: invalid file type specified. Choices: 3|6\n");
+        return -1;
+    }
+
+    // create img struct to store relevant image info
+    image img;
+    img.width = hdr->width;
+    img.height = hdr->height;
+    img.max_color_val = hdr->max_color_val;
+    img.pixmap = malloc(sizeof(RGBPixel) * img.width * img.height);
+    
+    // read image data (pixels)
+    if (origin_file_type == 3)
+        ret_val = read_p3_data(in_ptr, &img);
+    else
+        ret_val = read_p6_data(in_ptr, &img);
+    
+    if (ret_val < 0) {
+        fprintf(stderr, "Error: main: Problem reading image data\n");
+        return -1;
+    }
+*/
+    /*****************************//**
+     * write the data to output file
+     *********************************/
+/*
+    // write header info to output file
+    ret_val = write_header(out_ptr, hdr);
+    if (ret_val < 0) {
+        fprintf(stderr, "Error: main: Problem writing header to output file\n");
+        return -1;
+    }
+    printf("successfully wrote header.\n");
+
+    // write image data to destination file
+    if (atoi(argv[1]) == 3)
+        ret_val = write_p3_data(out_ptr, &img);
+    else
+        ret_val = write_p6_data(out_ptr, &img);
+    
+    if (ret_val < 0) {
+        fprintf(stderr, "Error: main: Problem writing image data to output file\n");
+        return -1;
+    }
+    printf("successfully wrote image data\n");
+    
+    // cleanup
+    free(img.pixmap);
+    free(hdr);
+    fclose(in_ptr);
+    fclose(out_ptr);
+    return 0;
+}*/
