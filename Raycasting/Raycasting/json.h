@@ -20,6 +20,7 @@
 #define SPH 2
 #define PLAN 3
 #define QUAD 4
+#define CYLIN 5
 /********************Here is what I am doing for the first time******************
 typedef struct Object{
     char *type;
@@ -55,6 +56,16 @@ typedef struct PLANE {
 } PLANE;
 
 
+
+typedef struct CYLINDER{
+    double *color;
+    double *position;
+    double radius;
+} CYLINDER;
+
+
+
+
 typedef struct QUADRIC {
     double *color;
     double *coefficient;
@@ -68,6 +79,7 @@ typedef struct OBJECT{
         SPHERE sphere;
         PLANE plane;
         QUADRIC quadric;
+        CYLINDER cylinder;
     } data;
 } OBJECT;
 

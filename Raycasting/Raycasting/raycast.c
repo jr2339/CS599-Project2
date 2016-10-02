@@ -127,6 +127,27 @@ double sphere_intersection(double *Ro, double *Rd, double *C, double r){
 }
 
 
+
+double cylinder_intersection(double* Ro, double* Rd,double* C, double r){
+    double a = (sqr(Rd[0]) + sqr(Rd[2]));
+    double b = (2 * (Ro[0] * Rd[0] - Rd[0] * C[0] + Ro[2] * Rd[2] - Rd[2] * C[2]));
+    double c = sqr(Ro[0]) - 2*Ro[0]*C[0] + sqr(C[0]) + sqr(Ro[2]) - 2*Ro[2]*C[2] + sqr(C[2]) - sqr(r);
+    
+    double det = sqr(b) - 4 * a * c;
+    if (det < 0) return -1;
+    
+    det = sqrt(det);
+    
+    double t0 = (-b - det) / (2*a);
+    if (t0 > 0) return t0;
+    
+    double t1 = (-b + det) / (2*a);
+    if (t1 > 0) return t1;
+    
+    return -1;
+
+}
+
 void raycast_scene(image *image, double cam_width, double cam_height, OBJECT *objects){
     // loop over all pixels and test for intesections with objects
     //store results in image->data which store pixels
@@ -174,7 +195,10 @@ void raycast_scene(image *image, double cam_width, double cam_height, OBJECT *ob
                     case PLAN:
                         t= plane_intersection(Ro, Rd, objects[counter].data.plane.position, objects[counter].data.plane.normal);
                         break;
-                        
+                      
+                    case CYLIN:
+                        t = cylinder_intersection(Ro, Rd,objects[counter].data.cylinder.position, objects[counter].data.cylinder.radius);
+                    
                     default:
                         exit(1);
                 }
@@ -191,6 +215,9 @@ void raycast_scene(image *image, double cam_width, double cam_height, OBJECT *ob
                 }
                 else if (objects[best_counter].type == SPH){
                     shade_pixel(objects[best_counter].data.sphere.color, x, y, image);
+                }
+                else if (objects[best_counter].type == CYLIN){
+                    shade_pixel(objects[best_counter].data.cylinder.color, x, y, image);
                 }
                 
             }
