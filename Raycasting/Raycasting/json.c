@@ -173,7 +173,8 @@ double* next_coefficient(FILE* json){
 }
 
 // Parasing the Json file
-void read_scene(FILE* json) {
+void read_scene(const char* filename) {
+     FILE* json = fopen(filename, "r");
     
     if (json == NULL) {
         fprintf(stderr, "Error: Could not open file\n");
@@ -242,11 +243,6 @@ void read_scene(FILE* json) {
                 object_type = PLAN;
                 objects[counter].type = PLAN;
             }
-            else if (strcmp(type, "cylinder") == 0) {
-                printf("============================== This Object is plane ==============================\n");
-                object_type = CYLIN;
-                objects[counter].type = CYLIN;
-            }
             else if (strcmp(type, "quadric") == 0) {
                 printf("============================= This Object is quadric =============================\n");
                 object_type = QUAD;
@@ -279,18 +275,13 @@ void read_scene(FILE* json) {
                         objects[counter].data.camera.height = next_number(json);
                     }
                     else if (strcmp(key, "radius") == 0) {
-                        if (object_type == SPH)
-                            objects[counter].data.sphere.radius = next_number(json);
-                        else if (object_type == CYLIN)
-                            objects[counter].data.cylinder.radius = next_number(json);
+                         objects[counter].data.sphere.radius = next_number(json);
                     }
                     else if (strcmp(key, "color") == 0) {
                         if (object_type == SPH)
                             objects[counter].data.sphere.color = next_rgb_color(json);
                         else if (object_type == PLAN)
                             objects[counter].data.plane.color = next_rgb_color(json);
-                        else if (object_type == CYLIN)
-                            objects[counter].data.cylinder.color = next_rgb_color(json);
                         else if (object_type == QUAD)
                             objects[counter].data.quadric.color = next_rgb_color(json);
                         else {
@@ -303,8 +294,6 @@ void read_scene(FILE* json) {
                             objects[counter].data.sphere.position = next_vector(json);
                         else if (object_type == PLAN)
                             objects[counter].data.plane.position = next_vector(json);
-                        else if (object_type == CYLIN)
-                            objects[counter].data.cylinder.position = next_vector(json);
                         else {
                             fprintf(stderr, "Error: read_json: Position vector can't be applied here: %d\n", line);
                             exit(1);

@@ -24,7 +24,7 @@ int main(int argc, const char * argv[]) {
     }
     
     /*open the input json file*/
-    FILE *input = fopen(argv[3], "r");
+    const char *input = argv[3];
     //Error Check
     if (input == NULL) {
         fprintf(stderr, "Error: main: Failed to open input file '%s'\n", argv[3]);
@@ -35,23 +35,25 @@ int main(int argc, const char * argv[]) {
     get_objects(objects);
     printf("get_objects finished work.....\n");
     
-    image image;
+    Image *image =(Image *)malloc(sizeof(Image));
     printf("Creeate a Image\n");
    
-    image.width = atoi(argv[1]);
-    printf("image width is %d \n",image.width);
-    image.height = atoi(argv[2]);
-    printf("image height is %d \n",image.height);
-    image.pixmap =(RGBPixel*) malloc(sizeof(RGBPixel) * image.width * image.height);
+    image->width = atoi(argv[1]);
+    printf("image width is %d \n",image->width);
+    image->height = atoi(argv[2]);
+    printf("image height is %d \n",image->height);
+    image->maxval = 255;
+    image->data =(unsigned char*) malloc(sizeof(unsigned char) * image->width * image->height*4);
 
     
     
     printf("get_camera function starting work\n");
     int pos = get_camera(objects);
     printf("get_camera function finished work\n");
-    raycast_scene(&image, objects[pos].data.camera.width, objects[pos].data.camera.height, objects);
+    raycast_scene(image, objects[pos].data.camera.width, objects[pos].data.camera.height, objects);
     
-    FILE *output = fopen(argv[4],"w");
-    create_ppm(output, 6, &image);
+    const char *output = argv[4];
+    //create_ppm(output, 6, &image);
+    ImageWrite(image, output,6);
     return 0;
 }

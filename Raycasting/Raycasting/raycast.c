@@ -27,12 +27,13 @@ int get_camera(OBJECT *objects){
  *need to flip the y axis due to the placement of the viewplane
 */
 
-void shade_pixel(double *color, int row, int col,image *image){
-    printf("shade_pixel starting works\n");
-    image->pixmap[row * image->width + col].r = color[0];
-    image->pixmap[row * image->width + col].g = color[1];
-    image->pixmap[row * image->width + col].b = color[2];
-    printf("shade_pixel finished works\n");
+void shade_pixel(double *color, int row, int col,Image *image){
+    //printf("shade_pixel starting works\n");
+    image->data[row * image->width*4 + col*4] = (u_char)color[0];
+    image->data[row * image->width*4 + col*4+1] = (u_char)color[1];
+    image->data[row * image->width*4 + col*4+2]= (u_char)color[2];
+    image->data[row * image->width*4 + col*4+3]= 255;
+    //printf("shade_pixel finished works\n");
 }
 
 
@@ -42,7 +43,7 @@ void shade_pixel(double *color, int row, int col,image *image){
  
  */
 double plane_intersection(double *Ro, double *Rd, double *Pos, double *Norm){
-    printf("plane_intersection starting works\n");
+    //printf("plane_intersection starting works\n");
     double alph,delta;
     normalize(Norm);
     /*
@@ -67,14 +68,14 @@ double plane_intersection(double *Ro, double *Rd, double *Pos, double *Norm){
         return -1;
     }
     
-    printf("plane_intersection finished works\n");
+    //printf("plane_intersection finished works\n");
     return t; // return something, but not t , need to figure out it
 
     
     }
 
 double sphere_intersection(double *Ro, double *Rd, double *C, double r){
-    printf("sphere_intersection starting works\n");
+    //printf("sphere_intersection starting works\n");
     double a, b, c;
     double s0,s1; // we have two solutions if delta >0
     //calculate quadratic formula
@@ -127,28 +128,7 @@ double sphere_intersection(double *Ro, double *Rd, double *C, double r){
 }
 
 
-
-double cylinder_intersection(double* Ro, double* Rd,double* C, double r){
-    double a = (sqr(Rd[0]) + sqr(Rd[2]));
-    double b = (2 * (Ro[0] * Rd[0] - Rd[0] * C[0] + Ro[2] * Rd[2] - Rd[2] * C[2]));
-    double c = sqr(Ro[0]) - 2*Ro[0]*C[0] + sqr(C[0]) + sqr(Ro[2]) - 2*Ro[2]*C[2] + sqr(C[2]) - sqr(r);
-    
-    double det = sqr(b) - 4 * a * c;
-    if (det < 0) return -1;
-    
-    det = sqrt(det);
-    
-    double t0 = (-b - det) / (2*a);
-    if (t0 > 0) return t0;
-    
-    double t1 = (-b + det) / (2*a);
-    if (t1 > 0) return t1;
-    
-    return -1;
-
-}
-
-void raycast_scene(image *image, double cam_width, double cam_height, OBJECT *objects){
+void raycast_scene(Image *image, double cam_width, double cam_height, OBJECT *objects){
     // loop over all pixels and test for intesections with objects
     //store results in image->data which store pixels
     int x; // x coordinate iterator
@@ -195,10 +175,7 @@ void raycast_scene(image *image, double cam_width, double cam_height, OBJECT *ob
                     case PLAN:
                         t= plane_intersection(Ro, Rd, objects[counter].data.plane.position, objects[counter].data.plane.normal);
                         break;
-                      
-                    case CYLIN:
-                        t = cylinder_intersection(Ro, Rd,objects[counter].data.cylinder.position, objects[counter].data.cylinder.radius);
-                    
+                        
                     default:
                         exit(1);
                 }
@@ -216,10 +193,11 @@ void raycast_scene(image *image, double cam_width, double cam_height, OBJECT *ob
                 else if (objects[best_counter].type == SPH){
                     shade_pixel(objects[best_counter].data.sphere.color, x, y, image);
                 }
-                else if (objects[best_counter].type == CYLIN){
-                    shade_pixel(objects[best_counter].data.cylinder.color, x, y, image);
-                }
                 
+            }
+            else{
+                Vector white ={1,1,1};
+                shade_pixel(white,x,y,image);
             }
             
         }

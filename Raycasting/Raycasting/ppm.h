@@ -1,44 +1,41 @@
 //
-//  ppm.c
+//  ppm.h
 //  Project1
 //
-//  Created by jr2339 on 9/8/16.
+//  Created by jr2339 on 9/7/16.
 //  Copyright © 2016 jr2339. All rights reserved.
 //
-#ifndef PPMRW_H
-#define PPMRW_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
-#define FALSE 0
-#define TRUE 1
-#define MAX_SIZE 1024
 
-/* variables and types */
-typedef int8_t boolean;
+#ifndef ppm_h
+#define ppm_h
+#include <sys/types.h>
 
-// file header info
-typedef struct header_t {
-    int file_type;
-    char **comments;
+
+// Create a new type to define Image
+
+
+
+typedef struct Image
+{
     int width;
     int height;
-    int max_color_val;
-} header;
+    u_char *data; // color
+    int magic_number;
+    int depth;
+    char *tupltype;
+    int maxval;
+}Image;
 
-// one pixel
-typedef struct RGBPixel_t {
-    unsigned char r, g, b;
-} RGBPixel;
+Image *ImageCreate(int width, int height,int magic_number);
+Image *readPPMHeader(FILE *f_source, Image *image);
+Image *readPAMHeader(FILE *f_source, Image *image);
+Image *ImageRead(const char *filename);
+void ImageWrite(Image *image, const char *filename,int format);
 
-// image info
-typedef struct image_t {
-    RGBPixel *pixmap;
-    int width, height, max_color_val;
-} image;
+#include <sys/types.h>
+// Create a new type to define Image
 
-void print_pixels(RGBPixel *pixmap, int width, int height);
-void create_ppm(FILE *fh, int type, image *img);
-#endif
+
+#endif /* ppm_h */
