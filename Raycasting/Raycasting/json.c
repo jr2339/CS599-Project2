@@ -122,7 +122,39 @@ double* next_vector(FILE* json) {
     expect_c(json, ']');
     return v;
 }
-
+/* since we could use 0-255 or 0-1 or whatever, this function checks bounds */
+int check_color_val(double v) {
+    if (v < 0.0 || v > MAX_COLOR_VAL)
+        return 0;
+    return 1;
+}
+/* Checks that the next 3 values in the FILE are valid rgb numbers */
+double* next_rgb_color(FILE* json) {
+    double* v = malloc(sizeof(double)*3);
+    skip_ws(json);
+    expect_c(json, '[');
+    skip_ws(json);
+    v[0] = MAX_COLOR_VAL * next_number(json);
+    skip_ws(json);
+    expect_c(json, ',');
+    skip_ws(json);
+    v[1] = MAX_COLOR_VAL * next_number(json);
+    skip_ws(json);
+    expect_c(json, ',');
+    skip_ws(json);
+    v[2] = MAX_COLOR_VAL * next_number(json);
+    skip_ws(json);
+    expect_c(json, ']');
+    // check that all values are valid
+    printf("rgb: %lf %lf %lf\n", v[0], v[1], v[2]);
+    if (!check_color_val(v[0]) ||
+        !check_color_val(v[1]) ||
+        !check_color_val(v[2])) {
+        fprintf(stderr, "Error: next_rgb_color: rgb value out of range: %d\n", line);
+        exit(1);
+    }
+    return v;
+}
 // This function at here is for quadric
 double* next_coefficient(FILE* json){
     double* v = malloc(10*sizeof(double));
@@ -246,11 +278,11 @@ void read_scene(FILE* json) {
                     }
                     else if (strcmp(key, "color") == 0) {
                         if (object_type == SPH)
-                            objects[counter].data.sphere.color = next_vector(json);
+                            objects[counter].data.sphere.color = next_rgb_color(json);
                         else if (object_type == PLAN)
-                            objects[counter].data.plane.color = next_vector(json);
+                            objects[counter].data.plane.color = next_rgb_color(json);
                         else if (object_type == QUAD)
-                            objects[counter].data.quadric.color = next_vector(json);
+                            objects[counter].data.quadric.color = next_rgb_color(json);
                         else {
                             fprintf(stderr, "Error: read_json: Color vector can't be applied here: %d\n", line);
                             exit(1);
