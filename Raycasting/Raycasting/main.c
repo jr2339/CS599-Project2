@@ -31,25 +31,26 @@ int main(int argc, const char * argv[]) {
         exit(1);
     }
     read_scene(input);
+    /*
     printf("Satring get objects...\n");
     get_objects(objects);
     printf("get_objects finished work.....\n");
-    
+    */
     Image *image =(Image *)malloc(sizeof(Image));
-    printf("Creeate a Image\n");
+    //printf("Creeate a Image\n");
    
     image->width = atoi(argv[1]);
-    printf("image width is %d \n",image->width);
+    //printf("image width is %d \n",image->width);
     image->height = atoi(argv[2]);
-    printf("image height is %d \n",image->height);
+    //printf("image height is %d \n",image->height);
     image->maxval = 255;
     image->data =(unsigned char*) malloc(sizeof(unsigned char) * image->width * image->height*4);
 
     
     
-    printf("get_camera function starting work\n");
+    //printf("get_camera function starting work\n");
     int pos = get_camera(objects);
-    printf("get_camera function finished work\n");
+    //printf("get_camera function finished work\n");
     raycast_scene(image, objects[pos].data.camera.width, objects[pos].data.camera.height, objects);
     
     const char *output = argv[4];

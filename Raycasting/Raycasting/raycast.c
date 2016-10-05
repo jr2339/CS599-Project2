@@ -77,7 +77,7 @@ double plane_intersection(double *Ro, double *Rd, double *Pos, double *Norm){
 double sphere_intersection(double *Ro, double *Rd, double *C, double r){
     //printf("sphere_intersection starting works\n");
     double a, b, c;
-    double s0,s1; // we have two solutions if delta >0
+    double t0,t1; // we have two solutions if delta >0
     //calculate quadratic formula
     //First find a, b, c
     a = sqr(Rd[0]) + sqr(Rd[1]) + sqr(Rd[2]);
@@ -97,36 +97,106 @@ double sphere_intersection(double *Ro, double *Rd, double *C, double r){
         return -1; // no solution
     }
     else if (disc == 0) {
-        s0 = -1*(b / (2*a)); // single solution
-        s1 = -1*(b / (2*a));
+        t0 = -1*(b / (2*a)); // single solution
+        t1 = -1*(b / (2*a));
         //printf("t0 = %lf\n", t0);
     }
     else {  // 2 solutions: find the smaller
-        s0 = (-1*b - sqrt(sqr(b) - 4*c))/2;
-        s1 = (-1*b + sqrt(sqr(b) - 4*c))/2;
+        t0 = (-1*b - sqrt(sqr(b) - 4*c))/2;
+        t1 = (-1*b + sqrt(sqr(b) - 4*c))/2;
 
     }
     
     
-    if (s0 < 0 && s1 < 0) {
+    if (t0 < 0 && t1 < 0) {
         // no intersection
         return -1;
     }
-    else if (s0 < 0 && s1 > 0) {
-        return s1;
+    else if (t0 < 0 && t1 > 0) {
+        return t1;
     }
-    else if (s0 > 0 && s1 < 0) {
-        return s0;
+    else if (t0 > 0 && t1 < 0) {
+        return t0;
     }
     else { // they were both positive
-        if (s0 <= s1)
-            return s0;
+        if (t0 <= t1)
+            return t0;
         else
-            return s1;
+            return t1;
     }
     
 }
 
+ double quadric_intersection(double *Ro, double *Rd, double *Co){
+    double a,b,c;
+    double t0,t1; // we have two solutions if delta >0
+     a = Co[0]*sqr(Rd[0]) //A(xd)^2
+        +Co[1]*sqr(Rd[1]) //B(yd)^2
+        +Co[2]*sqr(Rd[2]) //C(zd)^2
+        +Co[3]*Rd[0]*Rd[1] //D * xd *yd
+        +Co[4]*Rd[0]*Rd[2] //E * xd *zd
+        +Co[5]*Rd[1]*Rd[2];//F *yd *zd
+     //printf("quadric a = %lf\n", a);
+     b = 2*Co[0]*Ro[0]*Rd[0]   // 2*A*xo*xd
+        +2*Co[1]*Ro[1]*Rd[1]   //2*B*yo*yd
+        +2*Co[2]*Ro[2]*Rd[2]   //2*C*zo*zd
+        +  Co[3]*((Ro[0]*Rd[1])+(Ro[1]*Rd[0]))   //D*((xo*yd)+(yo*xd))
+        +  Co[4]*((Ro[0]*Rd[2])+(Ro[2]*Rd[0]))  //E*(xo*zd+zo*xd)
+        +  Co[5]*((Ro[1]*Rd[2])+(Rd[1]*Ro[2]))  //F*(yo*zd+yd*zo)
+        +  Co[6]*Rd[0]          //G*xd
+        +  Co[7]*Rd[1]          //H*yd
+        +  Co[8]*Rd[2];         //I*zd
+     //printf("quadric b = %lf\n", b);
+     c = Co[0]*sqr(Ro[0])       //A*xo^2
+        +Co[1]*sqr(Ro[1])       //B*yo^2
+        +Co[2]*sqr(Ro[2])       //C*zo^2
+        +Co[3]*Ro[0]*Ro[1]      //D*xo*yo
+        +Co[4]*Ro[0]*Ro[2]      //E*xo*zo
+        +Co[5]*Ro[1]*Ro[2]      //F*yo*zo
+        +Co[6]*Ro[0]            //G*xo
+        +Co[7]*Ro[1]            //H*yo
+        +Co[8]*Ro[2]            //I*zo
+        +Co[9];                 //J
+     //printf("quadric c = %lf\n", c);
+     if (a > 0.00001 || a < -0.00001) { // if a !=0
+         // check that discriminant is <, =, or > 0
+         double disc = sqr(b) - 4*a*c;
+         if (disc < 0) {
+             //printf("disc was < 0\n");
+             return -1; // no solution
+         }
+         else{
+             t0 = (-1*b - sqrt(sqr(b) - 4*a*c))/(2*a);
+             t1 = (-1*b + sqrt(sqr(b) - 4*a*c))/(2*a);
+         }
+
+     }
+     else{
+         t0 = -c/b;
+         t1 = -c/b;
+     }
+     //We campare t0 and t1
+     if (t0 < 0 && t1 < 0) {
+         // no intersection
+         return -1;
+     }
+     else if (t0 < 0 && t1 > 0) {
+         return t1;
+     }
+     else if (t0 > 0 && t1 < 0) {
+         return t0;
+     }
+     else { // they were both positive
+         if (t0 <= t1)
+             return t0;
+         else
+             return t1;
+     }
+
+     
+}
+ 
+ 
 
 void raycast_scene(Image *image, double cam_width, double cam_height, OBJECT *objects){
     // loop over all pixels and test for intesections with objects
@@ -136,7 +206,7 @@ void raycast_scene(Image *image, double cam_width, double cam_height, OBJECT *ob
     int counter; // object iterator
     
     Vector vp_pos= {0,0,1}; //view plane position
-    Vector Ro = {0,0,0}; // Ray origin position or Camera position
+    Vector Ro = {0,0,-6}; // Ray origin position or Camera position
     Vector point = {0,0,0}; //point on viewplane where intersection happens
     
     double pixheight = cam_height / image->height;
@@ -176,6 +246,9 @@ void raycast_scene(Image *image, double cam_width, double cam_height, OBJECT *ob
                         t= plane_intersection(Ro, Rd, objects[counter].data.plane.position, objects[counter].data.plane.normal);
                         break;
                         
+                    case QUAD:
+                        t = quadric_intersection(Ro, Rd, objects[counter].data.quadric.coefficient);
+                        break;
                     default:
                         exit(1);
                 }
@@ -192,6 +265,9 @@ void raycast_scene(Image *image, double cam_width, double cam_height, OBJECT *ob
                 }
                 else if (objects[best_counter].type == SPH){
                     shade_pixel(objects[best_counter].data.sphere.color, x, y, image);
+                }
+                else if (objects[best_counter].type == QUAD){
+                    shade_pixel(objects[best_counter].data.quadric.color,x,y,image);
                 }
                 
             }

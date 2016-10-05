@@ -95,13 +95,13 @@ char* next_string(FILE* json) {
 
 double next_number(FILE* json) {
     double value;
-    fscanf(json, "%lf", &value);
+    int res = fscanf(json, "%lf", &value);
     // Error check this..
-    if (value == EOF) {
+    if (res == EOF) {
         fprintf(stderr, "Error: Expected a number but found EOF: %d\n", line);
         return -1;;
     }
-    printf("next_number: %lf\n", value);
+    //printf("next_number: %lf\n", value);
     return value;
 }
 
@@ -146,7 +146,7 @@ double* next_rgb_color(FILE* json) {
     skip_ws(json);
     expect_c(json, ']');
     // check that all values are valid
-    printf("rgb: %lf %lf %lf\n", v[0], v[1], v[2]);
+    //printf("rgb: %lf %lf %lf\n", v[0], v[1], v[2]);
     if (!check_color_val(v[0]) ||
         !check_color_val(v[1]) ||
         !check_color_val(v[2])) {
@@ -158,6 +158,8 @@ double* next_rgb_color(FILE* json) {
 // This function at here is for quadric
 double* next_coefficient(FILE* json){
     double* v = malloc(10*sizeof(double));
+
+    skip_ws(json);
     expect_c(json, '[');
     skip_ws(json);
     v[0] = next_number(json);
@@ -213,8 +215,8 @@ void read_scene(const char* filename) {
             return;
         }
         if (c == '{') {     // found an object
-            printf("***************** We find A New Object. Now, we will parsing it *****************\n");
-            printf("*********************************************************************************\n");
+            //printf("***************** We find A New Object. Now, we will parsing it *****************\n");
+            //printf("*********************************************************************************\n");
             skip_ws(json);
             char *key = next_string(json);
             if (strcmp(key, "type") != 0) {
@@ -229,22 +231,22 @@ void read_scene(const char* filename) {
             char *type = next_string(json);
             int object_type;
             if (strcmp(type, "camera") == 0) {
-                printf("============================== This Object is camera =============================\n");
+                //printf("============================== This Object is camera =============================\n");
                 object_type = CAM;
                 objects[counter].type = CAM;
             }
             else if (strcmp(type, "sphere") == 0) {
-                printf("============================== This Object is sphere =============================\n");
+                //printf("============================== This Object is sphere =============================\n");
                 object_type = SPH;
                 objects[counter].type = SPH;
             }
             else if (strcmp(type, "plane") == 0) {
-                printf("============================== This Object is plane ==============================\n");
+                //printf("============================== This Object is plane ==============================\n");
                 object_type = PLAN;
                 objects[counter].type = PLAN;
             }
             else if (strcmp(type, "quadric") == 0) {
-                printf("============================= This Object is quadric =============================\n");
+                //printf("============================= This Object is quadric =============================\n");
                 object_type = QUAD;
                 objects[counter].type = QUAD;
             }
@@ -311,12 +313,11 @@ void read_scene(const char* filename) {
                     
                     else if (strcmp(key, "coefficient") == 0) {
                         if (object_type != QUAD) {
-                            fprintf(stderr, "Error: read_json: Normal vector can't be applied here: %d\n", line);
+                            fprintf(stderr, "Error: read_json: Coefficient can't be applied here: %d\n", line);
                             exit(1);
                         }
                         else
                              objects[counter].data.quadric.coefficient = next_coefficient(json);
-                        exit(1);
                     }
                     else {
                         fprintf(stderr, "Error: read_json: '%s' not a valid object: %d\n", key, line);
@@ -338,7 +339,7 @@ void read_scene(const char* filename) {
                 skip_ws(json);
             }
             else if (c == ']') {
-                printf("end of file\n");
+                //printf("end of file\n");
                 fclose(json);
                 return;
             }
@@ -380,6 +381,10 @@ void get_objects(OBJECT *object) {
             printf("normal: %lf %lf %lf\n", object[i].data.plane.normal[0],
                    object[i].data.plane.normal[1],
                    object[i].data.plane.normal[2]);
+        }
+        else if (object[i].type == QUAD){
+            printf("coefficient: %lf %lf %lf %lf %lf %lf %lf  %lf %lf %lf\n", object[i].data.plane.color[0],
+                   object[i].data.plane.color[1],object[i].data.plane.color[2],object[i].data.plane.color[3],object[i].data.plane.color[4],object[i].data.plane.color[5],object[i].data.plane.color[6],object[i].data.plane.color[7],object[i].data.plane.color[8],object[i].data.plane.color[9]);
         }
         else {
             printf("unsupported value\n");
