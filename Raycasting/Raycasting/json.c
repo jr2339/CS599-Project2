@@ -98,7 +98,7 @@ double next_number(FILE* json) {
     int res = fscanf(json, "%lf", &value);
     if (res == EOF) {
         fprintf(stderr, "Error: Expected a number but found EOF: %d\n", line);
-        return -1;
+        exit(1);
     }
     //printf("next_number: %lf\n", value);
     return value;
