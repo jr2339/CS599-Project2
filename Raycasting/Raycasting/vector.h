@@ -25,4 +25,5 @@ void Vector_scale(Vector a, double s, Vector b);
 double Vector_dot(Vector a, Vector b);
 void Vector_corss(Vector a, Vector b, Vector c);
 void normalize(double *v);
+
 #endif /* vector_h */

@@ -57,6 +57,7 @@ void Vector_corss(Vector a, Vector b, Vector c){
     c[1] = a[2]*b[0] - a[0]*b[2];
     c[2] = a[0]*b[1] - a[1]*b[0];
 }
+
 void normalize(double *v) {
     double len = sqr(v[0]) + sqr(v[1]) + sqr(v[2]);
     len = sqrt(len);
