@@ -15,7 +15,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "ppm.h"
-#define NumberOfObjects 20 // In our Json File, we have 20 Objects
+#define NumberOfObjects 256 
 #define CAM 1
 #define SPH 2
 #define PLAN 3

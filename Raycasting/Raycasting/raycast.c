@@ -206,7 +206,7 @@ void raycast_scene(Image *image, double cam_width, double cam_height, OBJECT *ob
     int counter; // object iterator
     
     Vector vp_pos= {0,0,1}; //view plane position
-    Vector Ro = {0,0,-6}; // Ray origin position or Camera position
+    Vector Ro = {0,0,0}; // Ray origin position or Camera position
     Vector point = {0,0,0}; //point on viewplane where intersection happens
     
     double pixheight = cam_height / image->height;
