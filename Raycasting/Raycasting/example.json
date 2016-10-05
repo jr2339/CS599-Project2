@@ -5,8 +5,15 @@
     "height": 1
  },
  {
- "type": "quadric",
- "color": [1, 0, 0],
- "coefficient": [1,1,1,0,0,0,0,0,0,-9]
+    "type": "sphere",
+    "color": [1, 0, 0],
+    "position": [1, 1, 10],
+    "radius": 2
+ },
+ {
+    "type": "plane",
+    "color": [0, 1, 0],
+    "position": [0, -1, 0],
+    "normal": [0, 1, 0]
  }
 ]
